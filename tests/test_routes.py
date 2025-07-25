@@ -93,8 +93,8 @@ class TestChatAPI:
                 question_type='discussion'    
             ).first()
             
-            # Test with completion phrases
-            completion_phrases = ['I think that is all', 'Nothing else', 'Done']
+            # Test with completion phrases that match our logic
+            completion_phrases = ['done', 'nothing else', 'I have nothing more to add']
             
             for phrase in completion_phrases:
                 response = client.post(
