@@ -7,6 +7,60 @@ import json
 import openai
 import os
 
+def generate_feedback_summary(question_text, chat_history):
+    """Generate a professional feedback summary from chat conversation using LLM."""
+    try:
+        from config import Config
+        client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+        
+        # Build the conversation context
+        conversation = []
+        for msg in chat_history:
+            role = "Assistant" if msg['role'] == 'assistant' else "User"
+            conversation.append(f"{role}: {msg['content']}")
+        
+        conversation_text = "\n".join(conversation)
+        
+        # Create summarization prompt
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """You are an expert at summarizing feedback conversations into professional, actionable feedback statements. 
+
+Your task is to analyze the conversation between a feedback interviewer and someone giving feedback, then create a concise, professional summary that captures the key insights and specifics mentioned.
+
+Guidelines:
+- Focus on concrete examples, behaviors, and impacts mentioned
+- Maintain a professional, constructive tone
+- Include specific details and examples when provided
+- Keep it concise but comprehensive (2-4 sentences typically)
+- Write in third person as feedback about the person being reviewed
+- Don't include the back-and-forth nature of the conversation, just the key insights"""
+                },
+                {
+                    "role": "user", 
+                    "content": f"""Please summarize this feedback conversation about: "{question_text}"
+
+Conversation:
+{conversation_text}
+
+Provide a professional feedback summary:"""
+                }
+            ],
+            max_tokens=200,
+            temperature=0.3
+        )
+        
+        return response.choices[0].message.content.strip()
+        
+    except Exception as e:
+        print(f"Error generating feedback summary: {e}")
+        # Fallback to simple concatenation
+        user_messages = [msg['content'] for msg in chat_history if msg['role'] == 'user']
+        return ' '.join(user_messages) if user_messages else 'No response provided'
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -98,6 +152,7 @@ def register_routes(app):
         data = request.get_json()
         user_message = data.get('message', '').strip()
         chat_history = data.get('chat_history', [])
+        feedback_request_id = data.get('feedback_request_id')
         
         # Get the original question to provide context
         question = Question.query.get_or_404(question_id)
@@ -105,6 +160,36 @@ def register_routes(app):
         try:
             # Initialize OpenAI client
             client = openai.OpenAI(api_key=app.config['OPENAI_API_KEY'])
+            
+            # Build context from all previous questions and responses
+            context_info = ""
+            if feedback_request_id:
+                # Get all questions for this feedback request in order
+                all_questions = Question.query.filter_by(template_id=question.template_id).order_by(Question.order_index).all()
+                
+                prior_context = []
+                current_question_reached = False
+                
+                for q in all_questions:
+                    if q.id == question_id:
+                        current_question_reached = True
+                        break
+                    
+                    # Look for existing responses to this question
+                    existing_response = Response.query.filter_by(
+                        feedback_request_id=feedback_request_id,
+                        question_id=q.id,
+                        is_draft=True
+                    ).first()
+                    
+                    if existing_response:
+                        if q.question_type == 'rating' and existing_response.rating_value is not None:
+                            prior_context.append(f"Q: {q.question_text}\nA: {existing_response.rating_value}/5")
+                        elif q.question_type == 'discussion' and existing_response.discussion_summary:
+                            prior_context.append(f"Q: {q.question_text}\nA: {existing_response.discussion_summary}")
+                
+                if prior_context:
+                    context_info = f"\n\nPrevious questions and responses in this feedback session:\n" + "\n\n".join(prior_context) + "\n\nUse this context to ask more relevant and connected follow-up questions."
             
             # Build conversation history for the LLM
             messages = [
@@ -119,8 +204,9 @@ Guidelines:
 - Keep your responses conversational and supportive
 - When they've provided sufficient detail (usually after 2-3 exchanges), acknowledge their response and ask if there's anything else they'd like to add
 - If they indicate they're done (saying things like "done", "nothing else", "that's all"), respond with "Thank you for that detailed feedback!" to signal completion
+- Reference previous answers when relevant to create a cohesive feedback experience
 
-Be warm, professional, and focused on helping them give the best possible feedback."""
+Be warm, professional, and focused on helping them give the best possible feedback.{context_info}"""
                 }
             ]
             
@@ -212,9 +298,17 @@ Be warm, professional, and focused on helping them give the best possible feedba
                     )
                 else:  # discussion
                     response.chat_history = json.dumps(response_data.get('chat_history', []))
-                    # Generate summary from chat history
-                    user_messages = [msg['content'] for msg in response_data.get('chat_history', []) if msg['role'] == 'user']
-                    response.discussion_summary = ' '.join(user_messages) if user_messages else 'No response provided'
+                    # Generate AI-powered summary from full conversation
+                    chat_history = response_data.get('chat_history', [])
+                    if chat_history:
+                        # Get the question text for context
+                        question_obj = Question.query.get(question_id)
+                        response.discussion_summary = generate_feedback_summary(
+                            question_obj.question_text, 
+                            chat_history
+                        )
+                    else:
+                        response.discussion_summary = 'No response provided'
                 
                 db.session.add(response)
             

@@ -108,6 +108,7 @@ document.querySelectorAll('.chat-input').forEach(input => {
 
 function sendChatMessage(questionId, message) {
     const chatContainer = document.getElementById(`chat_${questionId}`);
+    const scrollableContainer = chatContainer.parentElement; // This is the .chat-container with overflow
     
     // Add user message
     const userMessage = document.createElement('div');
@@ -118,6 +119,11 @@ function sendChatMessage(questionId, message) {
         </div>
     `;
     chatContainer.appendChild(userMessage);
+    
+    // Scroll to bottom with a slight delay to ensure rendering is complete
+    setTimeout(() => {
+        scrollableContainer.scrollTop = scrollableContainer.scrollHeight;
+    }, 10);
     
     // Initialize chat data for this question if not exists
     if (!chatData[questionId]) {
@@ -133,7 +139,8 @@ function sendChatMessage(questionId, message) {
         },
         body: JSON.stringify({
             message: message,
-            chat_history: chatData[questionId] || []
+            chat_history: chatData[questionId] || [],
+            feedback_request_id: '{{ feedback_request.id }}'
         })
     })
     .then(response => response.json())
@@ -146,7 +153,11 @@ function sendChatMessage(questionId, message) {
             </div>
         `;
         chatContainer.appendChild(botMessage);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
+        
+        // Scroll to bottom
+        setTimeout(() => {
+            scrollableContainer.scrollTop = scrollableContainer.scrollHeight;
+        }, 10);
         
         chatData[questionId].push({role: 'assistant', content: data.response});
         

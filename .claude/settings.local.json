@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Bash(pkill:*)",
+      "Bash(pytest:*)",
+      "Bash(git add:*)",
+      "Bash(sqlite3:*)"
+    ],
+    "deny": []
+  }
+}
