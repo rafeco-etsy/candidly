@@ -1,12 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_migrate import Migrate
 from config import Config
-from app.models import db, FeedbackRequest, Question, Response
+from models import db, FeedbackRequest, Question, Response
+from datetime import datetime
 import json
 
-def create_app():
+def create_app(config_class=Config):
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(config_class)
     
     db.init_app(app)
     migrate = Migrate(app, db)
@@ -14,6 +15,8 @@ def create_app():
     return app
 
 app = create_app()
+
+# Move all routes inside app context
 
 @app.route('/')
 def index():
@@ -89,11 +92,67 @@ def chat_response(question_id):
         'is_final': 'done' in user_message.lower() or 'nothing' in user_message.lower()
     })
 
-@app.route('/review/<request_id>')
+@app.route('/review/<request_id>', methods=['GET', 'POST'])
 def review_responses(request_id):
     feedback_request = FeedbackRequest.query.get_or_404(request_id)
+    questions = Question.query.filter_by(feedback_request_id=request_id).order_by(Question.order_index).all()
+    
+    if request.method == 'POST':
+        # Save responses from the survey
+        responses_data = request.get_json()
+        
+        # Clear existing draft responses
+        Response.query.filter_by(feedback_request_id=request_id, is_draft=True).delete()
+        
+        # Save new responses
+        for question_id, response_data in responses_data.items():
+            response = Response(
+                feedback_request_id=request_id,
+                question_id=question_id,
+                is_draft=True
+            )
+            
+            if response_data['type'] == 'rating':
+                response.rating_value = None if response_data['value'] == '' else (
+                    None if response_data['value'] == 'na' else int(response_data['value'])
+                )
+            else:  # discussion
+                response.chat_history = json.dumps(response_data.get('chat_history', []))
+                # Generate summary from chat history
+                user_messages = [msg['content'] for msg in response_data.get('chat_history', []) if msg['role'] == 'user']
+                response.discussion_summary = ' '.join(user_messages) if user_messages else 'No response provided'
+            
+            db.session.add(response)
+        
+        db.session.commit()
+        return jsonify({'success': True})
+    
     responses = Response.query.filter_by(feedback_request_id=request_id, is_draft=True).all()
-    return render_template('review.html', feedback_request=feedback_request, responses=responses)
+    
+    # Convert SQLAlchemy objects to dictionaries for JSON serialization
+    questions_dict = []
+    for q in questions:
+        questions_dict.append({
+            'id': q.id,
+            'question_text': q.question_text,
+            'question_type': q.question_type,
+            'order_index': q.order_index
+        })
+    
+    responses_dict = []
+    for r in responses:
+        responses_dict.append({
+            'id': r.id,
+            'question_id': r.question_id,
+            'rating_value': r.rating_value,
+            'discussion_summary': r.discussion_summary,
+            'chat_history': r.chat_history
+        })
+    
+    return render_template('review.html', 
+                         feedback_request=feedback_request, 
+                         questions=questions_dict, 
+                         responses=responses_dict)
 
 @app.route('/submit/<request_id>', methods=['POST'])
 def submit_feedback(request_id):
@@ -120,4 +179,4 @@ def view_report(request_id):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(debug=True, host='127.0.0.1', port=5001)

@@ -53,7 +53,28 @@ python app.py
 # or
 flask run
 
-# The app will be available at http://localhost:5000
+# The app will be available at http://localhost:5001
+```
+
+### Testing
+```bash
+# Install test dependencies (if not already installed)
+pip install -r requirements.txt
+
+# Run all tests
+pytest
+
+# Run tests with coverage report
+pytest --cov=. --cov-report=html
+
+# Run specific test file
+pytest tests/test_models.py
+
+# Run specific test
+pytest tests/test_routes.py::TestCreateRequest::test_create_request_post
+
+# Run tests in verbose mode
+pytest -v
 ```
 
 ### Database Management

@@ -181,9 +181,26 @@ document.getElementById('review-responses').addEventListener('click', function()
         };
     });
     
-    // Store responses and redirect to review page
-    sessionStorage.setItem('surveyResponses', JSON.stringify(responses));
-    window.location.href = `/review/{{ feedback_request.id }}`;
+    // Save responses to backend
+    fetch(`/review/{{ feedback_request.id }}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(responses)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = `/review/{{ feedback_request.id }}`;
+        } else {
+            alert('Error saving responses. Please try again.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error saving responses. Please try again.');
+    });
 });
 </script>
 {% endblock %}

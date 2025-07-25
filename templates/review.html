@@ -41,41 +41,40 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const responses = JSON.parse(sessionStorage.getItem('surveyResponses') || '{}');
     const container = document.getElementById('responses-container');
-    
-    // Get questions from backend (in a real app, this would be an API call)
     const questions = {{ questions | tojson }};
+    const responses = {{ responses | tojson }};
+    
+    // Create a map of responses by question_id for easy lookup
+    const responseMap = {};
+    responses.forEach(response => {
+        responseMap[response.question_id] = response;
+    });
     
     questions.forEach((question, index) => {
-        const response = responses[question.id];
+        const response = responseMap[question.id];
         const responseDiv = document.createElement('div');
         responseDiv.className = 'response-item border rounded p-3 mb-3';
         
         let responseContent = '';
         if (question.question_type === 'rating') {
-            const ratingValue = response ? response.value : 'Not answered';
+            const ratingValue = response && response.rating_value !== null ? response.rating_value : '';
             responseContent = `
                 <div class="row">
                     <div class="col-md-8">
-                        <strong>Rating:</strong> ${ratingValue}
+                        <strong>Rating:</strong> ${ratingValue || 'Not answered'}
                     </div>
                     <div class="col-md-4">
                         <select class="form-select" name="rating_${question.id}">
                             <option value="">Not answered</option>
-                            ${[1,2,3,4,5].map(i => `<option value="${i}" ${response && response.value == i ? 'selected' : ''}>${i}</option>`).join('')}
-                            <option value="na" ${response && response.value == 'na' ? 'selected' : ''}>N/A</option>
+                            ${[1,2,3,4,5].map(i => `<option value="${i}" ${ratingValue == i ? 'selected' : ''}>${i}</option>`).join('')}
+                            <option value="na" ${ratingValue === null && response ? 'selected' : ''}>N/A</option>
                         </select>
                     </div>
                 </div>
             `;
         } else {
-            // Generate summary from chat history
-            let summary = 'No response provided';
-            if (response && response.chat_history) {
-                const userMessages = response.chat_history.filter(msg => msg.role === 'user');
-                summary = userMessages.map(msg => msg.content).join(' ');
-            }
+            const summary = response ? response.discussion_summary : 'No response provided';
             
             responseContent = `
                 <div class="mb-2">
