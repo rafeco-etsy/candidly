@@ -12,89 +12,50 @@
                 </h4>
             </div>
             <div class="card-body">
-                <form method="POST">
-                    <div class="mb-4">
-                        <label for="target_name" class="form-label">Person being reviewed</label>
-                        <input type="text" class="form-control" id="target_name" name="target_name" required>
-                        <div class="form-text">Enter the name of the person who will receive this feedback.</div>
-                    </div>
+                {% if templates %}
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label for="target_name" class="form-label">Person being reviewed</label>
+                            <input type="text" class="form-control" id="target_name" name="target_name" required>
+                            <div class="form-text">Enter the name of the person who will receive this feedback.</div>
+                        </div>
 
-                    <div class="mb-4">
-                        <h5>Questions</h5>
-                        <div id="questions-container">
-                            <div class="question-item border rounded p-3 mb-3">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <input type="text" class="form-control" name="questions" placeholder="Enter your question" required>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <select class="form-select" name="question_types">
-                                            <option value="rating">Rating (1-5)</option>
-                                            <option value="discussion">Discussion</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="mt-2">
-                                    <button type="button" class="btn btn-sm btn-outline-danger remove-question">
-                                        <i class="fas fa-trash"></i> Remove
-                                    </button>
-                                </div>
+                        <div class="mb-4">
+                            <label for="template_id" class="form-label">Feedback Template</label>
+                            <select class="form-select" id="template_id" name="template_id" required>
+                                <option value="">Choose a template...</option>
+                                {% for template in templates %}
+                                <option value="{{ template.id }}" 
+                                        {% if request.args.get('template') == template.id %}selected{% endif %}>
+                                    {{ template.name }} ({{ template.questions|length }} questions)
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                Select a pre-configured set of questions. 
+                                <a href="{{ url_for('list_templates') }}">Manage templates</a>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-outline-primary" id="add-question">
-                            <i class="fas fa-plus me-2"></i>Add Question
-                        </button>
-                    </div>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-md-2">Cancel</a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Create Request
-                        </button>
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Create Request
+                            </button>
+                        </div>
+                    </form>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No templates available</h5>
+                        <p class="text-muted mb-4">You need to create a feedback template first.</p>
+                        <a href="{{ url_for('create_template') }}" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>Create Your First Template
+                        </a>
                     </div>
-                </form>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-document.getElementById('add-question').addEventListener('click', function() {
-    const container = document.getElementById('questions-container');
-    const newQuestion = document.createElement('div');
-    newQuestion.className = 'question-item border rounded p-3 mb-3';
-    newQuestion.innerHTML = `
-        <div class="row">
-            <div class="col-md-8">
-                <input type="text" class="form-control" name="questions" placeholder="Enter your question" required>
-            </div>
-            <div class="col-md-4">
-                <select class="form-select" name="question_types">
-                    <option value="rating">Rating (1-5)</option>
-                    <option value="discussion">Discussion</option>
-                </select>
-            </div>
-        </div>
-        <div class="mt-2">
-            <button type="button" class="btn btn-sm btn-outline-danger remove-question">
-                <i class="fas fa-trash"></i> Remove
-            </button>
-        </div>
-    `;
-    container.appendChild(newQuestion);
-});
-
-document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('remove-question') || e.target.parentElement.classList.contains('remove-question')) {
-        const questionItem = e.target.closest('.question-item');
-        if (document.querySelectorAll('.question-item').length > 1) {
-            questionItem.remove();
-        } else {
-            alert('You must have at least one question.');
-        }
-    }
-});
-</script>
 {% endblock %}

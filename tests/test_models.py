@@ -1,26 +1,51 @@
 import pytest
 from datetime import datetime
-from models import db, FeedbackRequest, Question, Response
+from models import db, FeedbackTemplate, FeedbackRequest, Question, Response
 import uuid
 import json
 
+class TestFeedbackTemplate:
+    def test_create_feedback_template(self, app):
+        """Test creating a feedback template."""
+        with app.app_context():
+            template = FeedbackTemplate(name="Manager Review", description="For reviewing managers")
+            db.session.add(template)
+            db.session.commit()
+            
+            assert template.id is not None
+            assert template.name == "Manager Review"
+            assert template.description == "For reviewing managers"
+            assert template.created_at is not None
+            assert isinstance(template.created_at, datetime)
+
+    def test_feedback_template_id_is_uuid(self, app):
+        """Test that feedback template ID is a valid UUID."""
+        with app.app_context():
+            template = FeedbackTemplate(name="Test Template")
+            db.session.add(template)
+            db.session.commit()
+            
+            # Should be able to parse as UUID
+            uuid.UUID(template.id)
+
 class TestFeedbackRequest:
-    def test_create_feedback_request(self, app):
+    def test_create_feedback_request(self, app, sample_template):
         """Test creating a feedback request."""
         with app.app_context():
-            request = FeedbackRequest(target_name="Jane Smith")
+            request = FeedbackRequest(target_name="Jane Smith", template_id=sample_template.id)
             db.session.add(request)
             db.session.commit()
             
             assert request.id is not None
             assert request.target_name == "Jane Smith"
+            assert request.template_id == sample_template.id
             assert request.created_at is not None
             assert isinstance(request.created_at, datetime)
 
-    def test_feedback_request_id_is_uuid(self, app):
+    def test_feedback_request_id_is_uuid(self, app, sample_template):
         """Test that feedback request ID is a valid UUID."""
         with app.app_context():
-            request = FeedbackRequest(target_name="Test User")
+            request = FeedbackRequest(target_name="Test User", template_id=sample_template.id)
             db.session.add(request)
             db.session.commit()
             
@@ -28,11 +53,11 @@ class TestFeedbackRequest:
             uuid.UUID(request.id)
 
 class TestQuestion:
-    def test_create_question(self, app, sample_feedback_request):
+    def test_create_question(self, app, sample_template):
         """Test creating a question."""
         with app.app_context():
             question = Question(
-                feedback_request_id=sample_feedback_request.id,
+                template_id=sample_template.id,
                 question_text="How is their leadership?",
                 question_type="rating",
                 order_index=2
@@ -45,17 +70,17 @@ class TestQuestion:
             assert question.question_type == "rating"
             assert question.order_index == 2
 
-    def test_question_types(self, app, sample_feedback_request):
+    def test_question_types(self, app, sample_template):
         """Test both question types are supported."""
         with app.app_context():
             rating_q = Question(
-                feedback_request_id=sample_feedback_request.id,
+                template_id=sample_template.id,
                 question_text="Rate communication",
                 question_type="rating",
                 order_index=0
             )
             discussion_q = Question(
-                feedback_request_id=sample_feedback_request.id,
+                template_id=sample_template.id,
                 question_text="Describe strengths",
                 question_type="discussion",
                 order_index=1
@@ -72,7 +97,7 @@ class TestResponse:
         """Test creating a rating response."""
         with app.app_context():
             questions = Question.query.filter_by(
-                feedback_request_id=sample_feedback_request.id,
+                template_id=sample_feedback_request.template_id,
                 question_type="rating"
             ).first()
             
@@ -93,7 +118,7 @@ class TestResponse:
         """Test creating a discussion response."""
         with app.app_context():
             question = Question.query.filter_by(
-                feedback_request_id=sample_feedback_request.id,
+                template_id=sample_feedback_request.template_id,
                 question_type="discussion"
             ).first()
             
@@ -126,7 +151,7 @@ class TestResponse:
         """Test changing response from draft to submitted."""
         with app.app_context():
             question = Question.query.filter_by(
-                feedback_request_id=sample_feedback_request.id
+                template_id=sample_feedback_request.template_id
             ).first()
             
             response = Response(
@@ -150,17 +175,24 @@ class TestResponse:
             assert response.submitted_at is not None
 
 class TestRelationships:
-    def test_feedback_request_questions_relationship(self, app, sample_feedback_request):
-        """Test the relationship between feedback requests and questions."""
+    def test_template_questions_relationship(self, app, sample_template):
+        """Test the relationship between templates and questions."""
         with app.app_context():
-            questions = sample_feedback_request.questions
+            questions = sample_template.questions
             assert len(questions) == 2
-            assert all(q.feedback_request_id == sample_feedback_request.id for q in questions)
+            assert all(q.template_id == sample_template.id for q in questions)
+
+    def test_template_requests_relationship(self, app, sample_template, sample_feedback_request):
+        """Test the relationship between templates and feedback requests."""
+        with app.app_context():
+            requests = sample_template.requests
+            assert len(requests) == 1
+            assert requests[0].template_id == sample_template.id
 
     def test_feedback_request_responses_relationship(self, app, sample_feedback_request):
         """Test the relationship between feedback requests and responses."""
         with app.app_context():
-            question = sample_feedback_request.questions[0]
+            question = Question.query.filter_by(template_id=sample_feedback_request.template_id).first()
             
             response = Response(
                 feedback_request_id=sample_feedback_request.id,
@@ -174,10 +206,10 @@ class TestRelationships:
             assert len(responses) == 1
             assert responses[0].rating_value == 3
 
-    def test_question_responses_relationship(self, app, sample_feedback_request):
+    def test_question_responses_relationship(self, app, sample_template, sample_feedback_request):
         """Test the relationship between questions and responses."""
         with app.app_context():
-            question = sample_feedback_request.questions[0]
+            question = sample_template.questions[0]
             
             # Create multiple responses for the same question
             responses = [

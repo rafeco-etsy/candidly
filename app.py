@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_migrate import Migrate
 from config import Config
-from models import db, FeedbackRequest, Question, Response
+from models import db, FeedbackTemplate, FeedbackRequest, Question, Response
 from datetime import datetime
 import json
 
@@ -24,14 +24,22 @@ def register_routes(app):
     def index():
         return render_template('index.html')
 
-    @app.route('/create', methods=['GET', 'POST'])
-    def create_request():
+    @app.route('/templates')
+    def list_templates():
+        """List all feedback templates."""
+        templates = FeedbackTemplate.query.order_by(FeedbackTemplate.created_at.desc()).all()
+        return render_template('templates/list.html', templates=templates)
+
+    @app.route('/templates/create', methods=['GET', 'POST'])
+    def create_template():
+        """Create a new feedback template."""
         if request.method == 'POST':
-            target_name = request.form['target_name']
+            name = request.form['name']
+            description = request.form.get('description', '')
             
-            # Create feedback request
-            feedback_request = FeedbackRequest(target_name=target_name)
-            db.session.add(feedback_request)
+            # Create template
+            template = FeedbackTemplate(name=name, description=description)
+            db.session.add(template)
             db.session.flush()
             
             # Create questions
@@ -41,7 +49,7 @@ def register_routes(app):
             for i, (question_text, question_type) in enumerate(zip(questions_data, question_types)):
                 if question_text.strip():
                     question = Question(
-                        feedback_request_id=feedback_request.id,
+                        template_id=template.id,
                         question_text=question_text.strip(),
                         question_type=question_type,
                         order_index=i
@@ -49,10 +57,28 @@ def register_routes(app):
                     db.session.add(question)
             
             db.session.commit()
+            flash('Feedback template created successfully!')
+            return redirect(url_for('list_templates'))
+        
+        return render_template('templates/create.html')
+
+    @app.route('/create', methods=['GET', 'POST'])
+    def create_request():
+        if request.method == 'POST':
+            target_name = request.form['target_name']
+            template_id = request.form['template_id']
+            
+            # Create feedback request
+            feedback_request = FeedbackRequest(target_name=target_name, template_id=template_id)
+            db.session.add(feedback_request)
+            db.session.commit()
+            
             flash('Feedback request created successfully!')
             return redirect(url_for('share_link', request_id=feedback_request.id))
         
-        return render_template('create.html')
+        # Get available templates
+        templates = FeedbackTemplate.query.order_by(FeedbackTemplate.name).all()
+        return render_template('create.html', templates=templates)
 
     @app.route('/share/<request_id>')
     def share_link(request_id):
@@ -62,7 +88,7 @@ def register_routes(app):
     @app.route('/survey/<request_id>')
     def survey(request_id):
         feedback_request = FeedbackRequest.query.get_or_404(request_id)
-        questions = Question.query.filter_by(feedback_request_id=request_id).order_by(Question.order_index).all()
+        questions = Question.query.filter_by(template_id=feedback_request.template_id).order_by(Question.order_index).all()
         return render_template('survey.html', feedback_request=feedback_request, questions=questions)
 
     @app.route('/api/chat/<question_id>', methods=['POST'])
@@ -97,7 +123,7 @@ def register_routes(app):
     @app.route('/review/<request_id>', methods=['GET', 'POST'])
     def review_responses(request_id):
         feedback_request = FeedbackRequest.query.get_or_404(request_id)
-        questions = Question.query.filter_by(feedback_request_id=request_id).order_by(Question.order_index).all()
+        questions = Question.query.filter_by(template_id=feedback_request.template_id).order_by(Question.order_index).all()
         
         if request.method == 'POST':
             # Save responses from the survey
@@ -171,6 +197,25 @@ def register_routes(app):
     @app.route('/thank-you')
     def thank_you():
         return render_template('thank_you.html')
+
+    @app.route('/dashboard')
+    def dashboard():
+        """Dashboard to view all feedback requests and their status."""
+        feedback_requests = FeedbackRequest.query.order_by(FeedbackRequest.created_at.desc()).all()
+        
+        # Add submission count for each request
+        requests_with_counts = []
+        for request in feedback_requests:
+            submitted_count = Response.query.filter_by(
+                feedback_request_id=request.id, 
+                is_draft=False
+            ).count()
+            requests_with_counts.append({
+                'request': request,
+                'submitted_count': submitted_count
+            })
+        
+        return render_template('dashboard.html', requests_with_counts=requests_with_counts)
 
     @app.route('/report/<request_id>')
     def view_report(request_id):

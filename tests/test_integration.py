@@ -1,6 +1,6 @@
 import pytest
 import json
-from models import db, FeedbackRequest, Question, Response
+from models import db, FeedbackTemplate, FeedbackRequest, Question, Response
 
 class TestCompleteWorkflow:
     """Integration tests for the complete feedback workflow."""
@@ -8,9 +8,10 @@ class TestCompleteWorkflow:
     def test_complete_feedback_flow(self, client):
         """Test the complete flow from creation to report viewing."""
         
-        # Step 1: Create a feedback request
-        create_response = client.post('/create', data={
-            'target_name': 'Alice Johnson',
+        # Step 1: Create a template first
+        template_response = client.post('/templates/create', data={
+            'name': 'Integration Test Template',
+            'description': 'Template for integration testing',
             'questions': [
                 'How would you rate their teamwork?',
                 'What are their key strengths?',
@@ -19,14 +20,25 @@ class TestCompleteWorkflow:
             'question_types': ['rating', 'discussion', 'discussion']
         })
         
-        assert create_response.status_code == 302
+        assert template_response.status_code == 302
         
         with client.application.app_context():
+            template = FeedbackTemplate.query.first()
+            
+            # Step 2: Create a feedback request using the template
+            create_response = client.post('/create', data={
+                'target_name': 'Alice Johnson',
+                'template_id': template.id
+            })
+            
+            assert create_response.status_code == 302
+            
             feedback_request = FeedbackRequest.query.first()
             assert feedback_request.target_name == 'Alice Johnson'
+            assert feedback_request.template_id == template.id
             
             questions = Question.query.filter_by(
-                feedback_request_id=feedback_request.id
+                template_id=template.id
             ).order_by(Question.order_index).all()
             
             assert len(questions) == 3
@@ -43,8 +55,9 @@ class TestCompleteWorkflow:
         
         # Step 3: Submit survey responses via review endpoint
         with client.application.app_context():
+            template = FeedbackTemplate.query.first()
             questions = Question.query.filter_by(
-                feedback_request_id=request_id
+                template_id=template.id
             ).order_by(Question.order_index).all()
             
             rating_q = questions[0]
@@ -126,16 +139,25 @@ class TestCompleteWorkflow:
     def test_multiple_feedback_sessions(self, client):
         """Test that multiple people can give feedback for the same request."""
         
-        # Create a feedback request
-        create_response = client.post('/create', data={
-            'target_name': 'Bob Wilson',
+        # Create a template first
+        template_response = client.post('/templates/create', data={
+            'name': 'Leadership Template',
+            'description': 'Template for leadership feedback',
             'questions': ['How is their leadership?'],
             'question_types': ['rating']
         })
         
-        assert create_response.status_code == 302
-        
         with client.application.app_context():
+            template = FeedbackTemplate.query.first()
+            
+            # Create a feedback request
+            create_response = client.post('/create', data={
+                'target_name': 'Bob Wilson',
+                'template_id': template.id
+            })
+            
+            assert create_response.status_code == 302
+            
             request_id = FeedbackRequest.query.first().id
             question_id = Question.query.first().id
         
@@ -175,14 +197,23 @@ class TestCompleteWorkflow:
     def test_draft_responses_isolation(self, client):
         """Test that draft responses don't appear in reports."""
         
-        # Create feedback request
-        create_response = client.post('/create', data={
-            'target_name': 'Carol Smith',
+        # Create template first
+        template_response = client.post('/templates/create', data={
+            'name': 'Communication Template',
+            'description': 'Template for communication feedback',
             'questions': ['Rate their communication'],
             'question_types': ['rating']
         })
         
         with client.application.app_context():
+            template = FeedbackTemplate.query.first()
+            
+            # Create feedback request
+            create_response = client.post('/create', data={
+                'target_name': 'Carol Smith',
+                'template_id': template.id
+            })
+            
             request_id = FeedbackRequest.query.first().id
             question_id = Question.query.first().id
         
@@ -241,6 +272,7 @@ class TestDataValidation:
         """Test that rating values are properly validated."""
         with client.application.app_context():
             question = Question.query.filter_by(
+                template_id=sample_feedback_request.template_id,
                 question_type='rating'
             ).first()
             
@@ -265,6 +297,7 @@ class TestDataValidation:
         """Test handling of very long text responses."""
         with client.application.app_context():
             question = Question.query.filter_by(
+                template_id=sample_feedback_request.template_id,
                 question_type='discussion'
             ).first()
             

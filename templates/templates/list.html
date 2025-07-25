@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback Templates - Candidly{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-file-alt me-2"></i>Feedback Templates
+                </h4>
+                <a href="{{ url_for('create_template') }}" class="btn btn-light btn-sm">
+                    <i class="fas fa-plus me-2"></i>New Template
+                </a>
+            </div>
+            <div class="card-body">
+                {% if templates %}
+                    <div class="row">
+                        {% for template in templates %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 border-2">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success">
+                                        <i class="fas fa-clipboard-list me-2"></i>{{ template.name }}
+                                    </h5>
+                                    {% if template.description %}
+                                        <p class="card-text text-muted">{{ template.description }}</p>
+                                    {% endif %}
+                                    <div class="mb-3">
+                                        <span class="badge bg-info">
+                                            {{ template.questions|length }} questions
+                                        </span>
+                                        <span class="badge bg-secondary">
+                                            {{ template.requests|length }} requests
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">
+                                        Created {{ template.created_at.strftime('%b %d, %Y') }}
+                                    </small>
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="btn-group w-100" role="group">
+                                        <a href="{{ url_for('create_request') }}?template={{ template.id }}" 
+                                           class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-paper-plane"></i> Use
+                                        </a>
+                                        <button class="btn btn-outline-info btn-sm" 
+                                                onclick="viewQuestions('{{ template.id }}')">
+                                            <i class="fas fa-eye"></i> Preview
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No templates created yet</h5>
+                        <p class="text-muted mb-4">Create your first feedback template to get started.</p>
+                        <a href="{{ url_for('create_template') }}" class="btn btn-success">
+                            <i class="fas fa-plus me-2"></i>Create Template
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Questions Preview Modal -->
+<div class="modal fade" id="questionsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Template Questions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="questionsContent">
+                <!-- Questions will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function viewQuestions(templateId) {
+    // In a real implementation, this would fetch questions via AJAX
+    // For now, just show a placeholder
+    document.getElementById('questionsContent').innerHTML = 
+        '<p class="text-muted">Question preview feature coming soon...</p>';
+    
+    new bootstrap.Modal(document.getElementById('questionsModal')).show();
+}
+</script>
+{% endblock %}

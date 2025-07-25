@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback Dashboard - Candidly{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-tachometer-alt me-2"></i>Feedback Dashboard
+                </h4>
+                <a href="{{ url_for('create_request') }}" class="btn btn-light btn-sm">
+                    <i class="fas fa-plus me-2"></i>New Request
+                </a>
+            </div>
+            <div class="card-body">
+                {% if requests_with_counts %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Target Person</th>
+                                    <th>Created</th>
+                                    <th>Questions</th>
+                                    <th>Responses</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in requests_with_counts %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ item.request.target_name }}</strong>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">
+                                            {{ item.request.created_at.strftime('%b %d, %Y at %I:%M %p') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">
+                                            {{ item.request.questions|length }} questions
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if item.submitted_count > 0 %}
+                                            <span class="badge bg-success">
+                                                {{ item.submitted_count }} submitted
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                No responses yet
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.submitted_count > 0 %}
+                                            <span class="text-success">
+                                                <i class="fas fa-check-circle"></i> Active
+                                            </span>
+                                        {% else %}
+                                            <span class="text-warning">
+                                                <i class="fas fa-clock"></i> Waiting
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{{ url_for('share_link', request_id=item.request.id) }}" 
+                                               class="btn btn-outline-primary" title="Share Link">
+                                                <i class="fas fa-share"></i>
+                                            </a>
+                                            {% if item.submitted_count > 0 %}
+                                                <a href="{{ url_for('view_report', request_id=item.request.id) }}" 
+                                                   class="btn btn-outline-success" title="View Report">
+                                                    <i class="fas fa-chart-line"></i>
+                                                </a>
+                                            {% else %}
+                                                <button class="btn btn-outline-secondary" disabled title="No responses yet">
+                                                    <i class="fas fa-chart-line"></i>
+                                                </button>
+                                            {% endif %}
+                                            <a href="{{ url_for('survey', request_id=item.request.id) }}" 
+                                               class="btn btn-outline-info" title="Preview Survey">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No feedback requests yet</h5>
+                        <p class="text-muted mb-4">Create your first feedback request to get started.</p>
+                        <a href="{{ url_for('create_request') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Create Feedback Request
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if requests_with_counts %}
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                <h4>{{ requests_with_counts|length }}</h4>
+                <p class="mb-0">Total Requests</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-comments fa-2x mb-2"></i>
+                <h4>{{ requests_with_counts|selectattr('submitted_count')|list|length }}</h4>
+                <p class="mb-0">With Responses</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                <h4>{{ requests_with_counts|sum(attribute='submitted_count') }}</h4>
+                <p class="mb-0">Total Responses</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

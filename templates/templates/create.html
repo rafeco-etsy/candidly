@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Create Template - Candidly{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus me-2"></i>Create Feedback Template
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-4">
+                        <label for="name" class="form-label">Template Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                        <div class="form-text">Give your template a descriptive name (e.g., "Manager Review", "Peer Feedback").</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="form-label">Description (Optional)</label>
+                        <textarea class="form-control" id="description" name="description" rows="2"></textarea>
+                        <div class="form-text">Briefly describe when this template should be used.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Questions</h5>
+                        <div id="questions-container">
+                            <div class="question-item border rounded p-3 mb-3">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <input type="text" class="form-control" name="questions" placeholder="Enter your question" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-select" name="question_types">
+                                            <option value="rating">Rating (1-5)</option>
+                                            <option value="discussion">Discussion</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-question">
+                                        <i class="fas fa-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-success" id="add-question">
+                            <i class="fas fa-plus me-2"></i>Add Question
+                        </button>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('list_templates') }}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>Create Template
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('add-question').addEventListener('click', function() {
+    const container = document.getElementById('questions-container');
+    const newQuestion = document.createElement('div');
+    newQuestion.className = 'question-item border rounded p-3 mb-3';
+    newQuestion.innerHTML = `
+        <div class="row">
+            <div class="col-md-8">
+                <input type="text" class="form-control" name="questions" placeholder="Enter your question" required>
+            </div>
+            <div class="col-md-4">
+                <select class="form-select" name="question_types">
+                    <option value="rating">Rating (1-5)</option>
+                    <option value="discussion">Discussion</option>
+                </select>
+            </div>
+        </div>
+        <div class="mt-2">
+            <button type="button" class="btn btn-sm btn-outline-danger remove-question">
+                <i class="fas fa-trash"></i> Remove
+            </button>
+        </div>
+    `;
+    container.appendChild(newQuestion);
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('remove-question') || e.target.parentElement.classList.contains('remove-question')) {
+        const questionItem = e.target.closest('.question-item');
+        if (document.querySelectorAll('.question-item').length > 1) {
+            questionItem.remove();
+        } else {
+            alert('You must have at least one question.');
+        }
+    }
+});
+</script>
+{% endblock %}

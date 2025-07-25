@@ -1,6 +1,6 @@
 import pytest
 import json
-from models import db, FeedbackRequest, Question, Response
+from models import db, FeedbackTemplate, FeedbackRequest, Question, Response
 
 class TestIndexRoute:
     def test_index_page(self, client):
@@ -11,18 +11,24 @@ class TestIndexRoute:
         assert b'Create Feedback Request' in response.data
 
 class TestCreateRequest:
-    def test_create_request_get(self, client):
-        """Test GET request to create page."""
+    def test_create_request_get_with_templates(self, client, sample_template):
+        """Test GET request to create page with available templates."""
         response = client.get('/create')
         assert response.status_code == 200
         assert b'Create Feedback Request' in response.data
+        assert b'Test Template' in response.data
 
-    def test_create_request_post(self, client):
+    def test_create_request_get_no_templates(self, client):
+        """Test GET request to create page with no templates."""
+        response = client.get('/create')
+        assert response.status_code == 200
+        assert b'No templates available' in response.data
+
+    def test_create_request_post(self, client, sample_template):
         """Test POST request to create feedback request."""
         response = client.post('/create', data={
             'target_name': 'John Doe',
-            'questions': ['How is their communication?', 'What are their strengths?'],
-            'question_types': ['rating', 'discussion']
+            'template_id': sample_template.id
         })
         
         assert response.status_code == 302  # Redirect after creation
@@ -32,11 +38,7 @@ class TestCreateRequest:
             request = FeedbackRequest.query.first()
             assert request is not None
             assert request.target_name == 'John Doe'
-            
-            questions = Question.query.filter_by(feedback_request_id=request.id).all()
-            assert len(questions) == 2
-            assert questions[0].question_text == 'How is their communication?'
-            assert questions[0].question_type == 'rating'
+            assert request.template_id == sample_template.id
 
 class TestShareLink:
     def test_share_link_valid_request(self, client, sample_feedback_request):
@@ -52,8 +54,8 @@ class TestShareLink:
         assert response.status_code == 404
 
 class TestSurvey:
-    def test_survey_page_valid_request(self, client, sample_feedback_request):
-        """Test survey page loads with questions."""
+    def test_survey_page_valid_request(self, client, sample_feedback_request, sample_template):
+        """Test survey page loads with questions from template."""
         response = client.get(f'/survey/{sample_feedback_request.id}')
         assert response.status_code == 200
         assert b'John Doe' in response.data
@@ -66,11 +68,11 @@ class TestSurvey:
         assert response.status_code == 404
 
 class TestChatAPI:
-    def test_chat_response_api(self, client, sample_feedback_request):
+    def test_chat_response_api(self, client, sample_feedback_request, sample_template):
         """Test the chat API endpoint."""
         with client.application.app_context():
             question = Question.query.filter_by(
-                feedback_request_id=sample_feedback_request.id,
+                template_id=sample_template.id,
                 question_type='discussion'
             ).first()
             
@@ -85,11 +87,11 @@ class TestChatAPI:
             assert 'is_final' in data
             assert isinstance(data['is_final'], bool)
 
-    def test_chat_response_completion_detection(self, client, sample_feedback_request):
+    def test_chat_response_completion_detection(self, client, sample_feedback_request, sample_template):
         """Test that chat detects completion properly."""
         with client.application.app_context():
             question = Question.query.filter_by(
-                feedback_request_id=sample_feedback_request.id,
+                template_id=sample_template.id,
                 question_type='discussion'    
             ).first()
             
@@ -116,7 +118,7 @@ class TestReviewResponses:
         """Test that review page can save responses via POST."""
         with client.application.app_context():
             questions = Question.query.filter_by(
-                feedback_request_id=sample_feedback_request.id
+                template_id=sample_feedback_request.template_id
             ).all()
             
             rating_question = next(q for q in questions if q.question_type == 'rating')
@@ -166,7 +168,7 @@ class TestReviewResponses:
         with client.application.app_context():
             # Create some sample responses
             question = Question.query.filter_by(
-                feedback_request_id=sample_feedback_request.id
+                template_id=sample_feedback_request.template_id
             ).first()
             
             response = Response(
@@ -191,7 +193,7 @@ class TestSubmitFeedback:
         """Test submitting feedback marks responses as not draft."""
         with client.application.app_context():
             question = Question.query.filter_by(
-                feedback_request_id=sample_feedback_request.id
+                template_id=sample_feedback_request.template_id
             ).first()
             
             # Create a draft response
@@ -224,7 +226,7 @@ class TestViewReport:
         """Test report page with submitted responses."""
         with client.application.app_context():
             question = Question.query.filter_by(
-                feedback_request_id=sample_feedback_request.id
+                template_id=sample_feedback_request.template_id
             ).first()
             
             # Create a submitted response

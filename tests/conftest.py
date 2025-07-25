@@ -2,7 +2,7 @@ import pytest
 import tempfile
 import os
 from app import create_app
-from models import db, FeedbackRequest, Question, Response
+from models import db, FeedbackTemplate, FeedbackRequest, Question, Response
 
 @pytest.fixture
 def app():
@@ -36,23 +36,23 @@ def runner(app):
     return app.test_cli_runner()
 
 @pytest.fixture
-def sample_feedback_request(app):
-    """Create a sample feedback request with questions."""
+def sample_template(app):
+    """Create a sample feedback template with questions."""
     with app.app_context():
-        feedback_request = FeedbackRequest(target_name="John Doe")
-        db.session.add(feedback_request)
+        template = FeedbackTemplate(name="Test Template", description="A test template")
+        db.session.add(template)
         db.session.flush()
         
         # Add some questions
         questions = [
             Question(
-                feedback_request_id=feedback_request.id,
+                template_id=template.id,
                 question_text="How would you rate their communication?",
                 question_type="rating",
                 order_index=0
             ),
             Question(
-                feedback_request_id=feedback_request.id,
+                template_id=template.id,
                 question_text="What are their greatest strengths?",
                 question_type="discussion",
                 order_index=1
@@ -62,6 +62,18 @@ def sample_feedback_request(app):
         for question in questions:
             db.session.add(question)
         
+        db.session.commit()
+        
+        # Refresh to ensure relationships are loaded
+        db.session.refresh(template)
+        yield template
+
+@pytest.fixture
+def sample_feedback_request(app, sample_template):
+    """Create a sample feedback request using a template."""
+    with app.app_context():
+        feedback_request = FeedbackRequest(target_name="John Doe", template_id=sample_template.id)
+        db.session.add(feedback_request)
         db.session.commit()
         
         # Refresh to ensure relationships are loaded
