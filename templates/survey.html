@@ -94,6 +94,7 @@ document.querySelectorAll('.send-message').forEach(button => {
 document.querySelectorAll('.chat-input').forEach(input => {
     input.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
+            e.preventDefault(); // Prevent form submission
             const questionId = this.dataset.questionId;
             const message = this.value.trim();
             

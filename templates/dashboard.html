@@ -21,6 +21,7 @@
                             <thead>
                                 <tr>
                                     <th>Target Person</th>
+                                    <th>Template</th>
                                     <th>Created</th>
                                     <th>Questions</th>
                                     <th>Responses</th>
@@ -32,7 +33,27 @@
                                 {% for item in requests_with_counts %}
                                 <tr>
                                     <td>
-                                        <strong>{{ item.request.target_name }}</strong>
+                                        {% if item.submitted_count > 0 %}
+                                            <a href="{{ url_for('view_report', request_id=item.request.id) }}" 
+                                               class="text-decoration-none">
+                                                <strong>{{ item.request.target_name }}</strong>
+                                                <i class="fas fa-external-link-alt ms-1 text-muted" style="font-size: 0.8em;"></i>
+                                            </a>
+                                        {% else %}
+                                            <strong class="text-muted">{{ item.request.target_name }}</strong>
+                                            <small class="text-muted d-block">No responses yet</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if item.request.template %}
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-clipboard-list me-1"></i>{{ item.request.template.name }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="fas fa-edit me-1"></i>Custom
+                                            </span>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         <small class="text-muted">
