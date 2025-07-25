@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Share Feedback Request - Candidly{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-share me-2"></i>Feedback Request Created
+                </h4>
+            </div>
+            <div class="card-body text-center">
+                <h5 class="mb-3">Feedback request for <strong>{{ feedback_request.target_name }}</strong></h5>
+                <p class="mb-4">Share this link with people you'd like to provide feedback:</p>
+                
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="survey-link" 
+                           value="{{ request.url_root }}survey/{{ feedback_request.id }}" readonly>
+                    <button class="btn btn-outline-secondary" type="button" onclick="copyLink()">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Note:</strong> Feedback givers will be able to review and edit their responses before final submission.
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                    <a href="{{ url_for('survey', request_id=feedback_request.id) }}" class="btn btn-primary me-md-2">
+                        <i class="fas fa-eye me-2"></i>Preview Survey
+                    </a>
+                    <a href="{{ url_for('view_report', request_id=feedback_request.id) }}" class="btn btn-outline-secondary me-md-2">
+                        <i class="fas fa-chart-line me-2"></i>View Report
+                    </a>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-home me-2"></i>Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyLink() {
+    const linkInput = document.getElementById('survey-link');
+    linkInput.select();
+    document.execCommand('copy');
+    
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    button.classList.remove('btn-outline-secondary');
+    button.classList.add('btn-success');
+    
+    setTimeout(() => {
+        button.innerHTML = originalText;
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-secondary');
+    }, 2000);
+}
+</script>
+{% endblock %}

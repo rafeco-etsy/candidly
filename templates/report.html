@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback Report - Candidly{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>Feedback Report for {{ feedback_request.target_name }}
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if responses %}
+                    <div class="mb-4">
+                        <small class="text-muted">
+                            Report generated on {{ feedback_request.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                        </small>
+                    </div>
+
+                    {% for response in responses %}
+                    <div class="response-section border rounded p-3 mb-4">
+                        <h6 class="fw-bold text-primary mb-3">{{ response.question.question_text }}</h6>
+                        
+                        {% if response.question.question_type == 'rating' %}
+                            <div class="rating-display">
+                                {% if response.rating_value %}
+                                    <span class="badge bg-primary fs-6">{{ response.rating_value }}/5</span>
+                                {% else %}
+                                    <span class="badge bg-secondary fs-6">N/A</span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="discussion-response">
+                                {% if response.discussion_summary %}
+                                    <p class="mb-0">{{ response.discussion_summary }}</p>
+                                {% else %}
+                                    <p class="text-muted mb-0">No response provided</p>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-primary" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Print Report
+                        </button>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No feedback submitted yet</h5>
+                        <p class="text-muted">Responses will appear here once feedback is submitted.</p>
+                        <a href="{{ url_for('share_link', request_id=feedback_request.id) }}" class="btn btn-primary">
+                            <i class="fas fa-share me-2"></i>Share Survey Link
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

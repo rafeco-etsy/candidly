@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Review Responses - Candidly{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="mb-0">
+                    <i class="fas fa-eye me-2"></i>Review Your Feedback for {{ feedback_request.target_name }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Final Review:</strong> Please review your responses below. You can edit any of the summaries before submitting. 
+                    Once submitted, your feedback will be shared with the requestor.
+                </div>
+
+                <form method="POST" action="{{ url_for('submit_feedback', request_id=feedback_request.id) }}">
+                    <div id="responses-container">
+                        <!-- Responses will be populated by JavaScript -->
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-between mt-4">
+                        <a href="{{ url_for('survey', request_id=feedback_request.id) }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Survey
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const responses = JSON.parse(sessionStorage.getItem('surveyResponses') || '{}');
+    const container = document.getElementById('responses-container');
+    
+    // Get questions from backend (in a real app, this would be an API call)
+    const questions = {{ questions | tojson }};
+    
+    questions.forEach((question, index) => {
+        const response = responses[question.id];
+        const responseDiv = document.createElement('div');
+        responseDiv.className = 'response-item border rounded p-3 mb-3';
+        
+        let responseContent = '';
+        if (question.question_type === 'rating') {
+            const ratingValue = response ? response.value : 'Not answered';
+            responseContent = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <strong>Rating:</strong> ${ratingValue}
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" name="rating_${question.id}">
+                            <option value="">Not answered</option>
+                            ${[1,2,3,4,5].map(i => `<option value="${i}" ${response && response.value == i ? 'selected' : ''}>${i}</option>`).join('')}
+                            <option value="na" ${response && response.value == 'na' ? 'selected' : ''}>N/A</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Generate summary from chat history
+            let summary = 'No response provided';
+            if (response && response.chat_history) {
+                const userMessages = response.chat_history.filter(msg => msg.role === 'user');
+                summary = userMessages.map(msg => msg.content).join(' ');
+            }
+            
+            responseContent = `
+                <div class="mb-2">
+                    <strong>Summary:</strong>
+                </div>
+                <textarea class="form-control" name="summary_${question.id}" rows="3">${summary}</textarea>
+                <small class="form-text text-muted">You can edit this summary before submitting.</small>
+            `;
+        }
+        
+        responseDiv.innerHTML = `
+            <h6 class="fw-bold mb-3">${index + 1}. ${question.question_text}</h6>
+            ${responseContent}
+        `;
+        
+        container.appendChild(responseDiv);
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback Survey - Candidly{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-clipboard-list me-2"></i>Feedback for {{ feedback_request.target_name }}
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Privacy Notice:</strong> Your responses will be reviewed by you before submission. 
+                    You can edit or modify any answers before they're shared.
+                </div>
+
+                <form id="survey-form">
+                    {% for question in questions %}
+                    <div class="question-section mb-4 p-3 border rounded" data-question-id="{{ question.id }}">
+                        <h6 class="fw-bold mb-3">{{ loop.index }}. {{ question.question_text }}</h6>
+                        
+                        {% if question.question_type == 'rating' %}
+                            <div class="rating-section">
+                                <div class="btn-group" role="group">
+                                    {% for i in range(1, 6) %}
+                                    <input type="radio" class="btn-check" name="rating_{{ question.id }}" 
+                                           id="rating_{{ question.id }}_{{ i }}" value="{{ i }}">
+                                    <label class="btn btn-outline-primary" for="rating_{{ question.id }}_{{ i }}">{{ i }}</label>
+                                    {% endfor %}
+                                    <input type="radio" class="btn-check" name="rating_{{ question.id }}" 
+                                           id="rating_{{ question.id }}_na" value="na">
+                                    <label class="btn btn-outline-secondary" for="rating_{{ question.id }}_na">N/A</label>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="discussion-section">
+                                <div class="chat-container border rounded p-3 mb-3" style="min-height: 200px; max-height: 400px; overflow-y: auto;">
+                                    <div class="chat-messages" id="chat_{{ question.id }}">
+                                        <div class="message bot-message mb-2">
+                                            <div class="bg-light p-2 rounded">
+                                                <strong>Assistant:</strong> {{ question.question_text }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" class="form-control chat-input" 
+                                           placeholder="Type your response..." 
+                                           data-question-id="{{ question.id }}">
+                                    <button class="btn btn-primary send-message" type="button" 
+                                            data-question-id="{{ question.id }}">Send</button>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">Type your response and I'll ask follow-up questions to help you provide more detailed feedback.</small>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <button type="button" class="btn btn-success btn-lg" id="review-responses">
+                            <i class="fas fa-eye me-2"></i>Review My Responses
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let chatData = {};
+
+document.querySelectorAll('.send-message').forEach(button => {
+    button.addEventListener('click', function() {
+        const questionId = this.dataset.questionId;
+        const input = document.querySelector(`input[data-question-id="${questionId}"]`);
+        const message = input.value.trim();
+        
+        if (message) {
+            sendChatMessage(questionId, message);
+            input.value = '';
+        }
+    });
+});
+
+document.querySelectorAll('.chat-input').forEach(input => {
+    input.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            const questionId = this.dataset.questionId;
+            const message = this.value.trim();
+            
+            if (message) {
+                sendChatMessage(questionId, message);
+                this.value = '';
+            }
+        }
+    });
+});
+
+function sendChatMessage(questionId, message) {
+    const chatContainer = document.getElementById(`chat_${questionId}`);
+    
+    // Add user message
+    const userMessage = document.createElement('div');
+    userMessage.className = 'message user-message mb-2 text-end';
+    userMessage.innerHTML = `
+        <div class="bg-primary text-white p-2 rounded d-inline-block">
+            <strong>You:</strong> ${message}
+        </div>
+    `;
+    chatContainer.appendChild(userMessage);
+    
+    // Initialize chat data for this question if not exists
+    if (!chatData[questionId]) {
+        chatData[questionId] = [];
+    }
+    chatData[questionId].push({role: 'user', content: message});
+    
+    // Send to backend for AI response
+    fetch(`/api/chat/${questionId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({message: message})
+    })
+    .then(response => response.json())
+    .then(data => {
+        const botMessage = document.createElement('div');
+        botMessage.className = 'message bot-message mb-2';
+        botMessage.innerHTML = `
+            <div class="bg-light p-2 rounded">
+                <strong>Assistant:</strong> ${data.response}
+            </div>
+        `;
+        chatContainer.appendChild(botMessage);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        
+        chatData[questionId].push({role: 'assistant', content: data.response});
+        
+        if (data.is_final) {
+            // Disable input for this question
+            const input = document.querySelector(`input[data-question-id="${questionId}"]`);
+            const button = document.querySelector(`button[data-question-id="${questionId}"]`);
+            input.disabled = true;
+            button.disabled = true;
+            
+            // Mark question as complete
+            const questionSection = document.querySelector(`div[data-question-id="${questionId}"]`);
+            questionSection.classList.add('border-success');
+        }
+    });
+}
+
+document.getElementById('review-responses').addEventListener('click', function() {
+    // Collect all responses
+    const responses = {};
+    
+    // Collect rating responses
+    document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+        const questionId = input.name.split('_')[1];
+        responses[questionId] = {
+            type: 'rating',
+            value: input.value
+        };
+    });
+    
+    // Collect discussion responses
+    Object.keys(chatData).forEach(questionId => {
+        responses[questionId] = {
+            type: 'discussion',
+            chat_history: chatData[questionId]
+        };
+    });
+    
+    // Store responses and redirect to review page
+    sessionStorage.setItem('surveyResponses', JSON.stringify(responses));
+    window.location.href = `/review/{{ feedback_request.id }}`;
+});
+</script>
+{% endblock %}

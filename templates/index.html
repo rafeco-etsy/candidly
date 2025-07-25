@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body text-center p-5">
+                <h1 class="card-title mb-4">
+                    <i class="fas fa-comments text-primary me-3"></i>Candidly
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Honest feedback, reviewed and confirmed before it's shared.
+                </p>
+                <p class="mb-4">
+                    Create better feedback experiences with our conversational approach. 
+                    Get more thoughtful, specific responses through guided discussions.
+                </p>
+                <div class="d-grid gap-2 d-md-block">
+                    <a href="{{ url_for('create_request') }}" class="btn btn-primary btn-lg me-2">
+                        <i class="fas fa-plus me-2"></i>Create Feedback Request
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                <h5 class="card-title">Conversational</h5>
+                <p class="card-text">AI-powered follow-up questions encourage deeper, more specific feedback.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-eye fa-3x text-success mb-3"></i>
+                <h5 class="card-title">Review & Edit</h5>
+                <p class="card-text">Feedback givers can review and edit their responses before final submission.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-shield-alt fa-3x text-info mb-3"></i>
+                <h5 class="card-title">Private & Secure</h5>
+                <p class="card-text">Feedback is only shared with intended recipients after confirmation.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
