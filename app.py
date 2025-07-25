@@ -4,6 +4,8 @@ from config import Config
 from models import db, FeedbackTemplate, FeedbackRequest, Question, Response
 from datetime import datetime
 import json
+import openai
+import os
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -95,30 +97,94 @@ def register_routes(app):
     def chat_response(question_id):
         data = request.get_json()
         user_message = data.get('message', '').strip()
+        chat_history = data.get('chat_history', [])
         
-        # Simple chatbot logic for MVP
-        # In production, integrate with OpenAI or similar AI service
-        follow_up_questions = [
-            "Can you share a specific example?",
-            "How has this impacted the team or project?",
-            "What made this particularly effective or challenging?",
-            "Is there anything else you'd like to add?"
-        ]
+        # Get the original question to provide context
+        question = Question.query.get_or_404(question_id)
         
-        # Simple response logic - in real implementation, use AI
-        if len(user_message) < 20:
-            response = follow_up_questions[0]
-        elif "example" not in user_message.lower():
-            response = follow_up_questions[0]
-        elif len(user_message) < 50:
-            response = follow_up_questions[1]
-        else:
-            response = follow_up_questions[3]
-        
-        return jsonify({
-            'response': response,
-            'is_final': 'done' in user_message.lower() or 'nothing' in user_message.lower()
-        })
+        try:
+            # Initialize OpenAI client
+            client = openai.OpenAI(api_key=app.config['OPENAI_API_KEY'])
+            
+            # Build conversation history for the LLM
+            messages = [
+                {
+                    "role": "system",
+                    "content": f"""You are a skilled feedback interviewer helping someone provide detailed, constructive feedback. Your goal is to help them give comprehensive and thoughtful responses about: "{question.question_text}"
+
+Guidelines:
+- Ask thoughtful follow-up questions to encourage depth and specificity
+- Help them provide concrete examples and details
+- Guide them toward constructive, actionable feedback
+- Keep your responses conversational and supportive
+- When they've provided sufficient detail (usually after 2-3 exchanges), acknowledge their response and ask if there's anything else they'd like to add
+- If they indicate they're done (saying things like "done", "nothing else", "that's all"), respond with "Thank you for that detailed feedback!" to signal completion
+
+Be warm, professional, and focused on helping them give the best possible feedback."""
+                }
+            ]
+            
+            # Add chat history
+            for msg in chat_history:
+                messages.append({
+                    "role": msg["role"],
+                    "content": msg["content"]
+                })
+            
+            # Add current user message
+            messages.append({
+                "role": "user", 
+                "content": user_message
+            })
+            
+            # Call OpenAI API
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=messages,
+                max_tokens=150,
+                temperature=0.7
+            )
+            
+            ai_response = response.choices[0].message.content.strip()
+            
+            # Check if this should be the final message
+            is_final = (
+                "thank you for that detailed feedback" in ai_response.lower() or
+                "done" in user_message.lower() or 
+                "nothing else" in user_message.lower() or
+                "that's all" in user_message.lower()
+            )
+            
+            return jsonify({
+                'response': ai_response,
+                'is_final': is_final
+            })
+            
+        except Exception as e:
+            # Fallback to simple responses if OpenAI fails
+            print(f"OpenAI API error: {e}")
+            
+            follow_up_questions = [
+                "Can you share a specific example?",
+                "How has this impacted the team or project?", 
+                "What made this particularly effective or challenging?",
+                "Is there anything else you'd like to add?"
+            ]
+            
+            # Simple fallback logic
+            if len(user_message) < 20:
+                response = follow_up_questions[0]
+            elif "example" not in user_message.lower():
+                response = follow_up_questions[0]
+            elif len(user_message) < 50:
+                response = follow_up_questions[1]
+            else:
+                response = follow_up_questions[3]
+            
+            return jsonify({
+                'response': response,
+                'is_final': 'done' in user_message.lower() or 'nothing' in user_message.lower()
+            })
 
     @app.route('/review/<request_id>', methods=['GET', 'POST'])
     def review_responses(request_id):

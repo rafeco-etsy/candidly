@@ -131,7 +131,10 @@ function sendChatMessage(questionId, message) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({message: message})
+        body: JSON.stringify({
+            message: message,
+            chat_history: chatData[questionId] || []
+        })
     })
     .then(response => response.json())
     .then(data => {

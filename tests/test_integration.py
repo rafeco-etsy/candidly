@@ -247,8 +247,8 @@ class TestErrorHandling:
     def test_chat_api_with_invalid_question(self, client):
         """Test chat API with non-existent question ID."""
         response = client.post('/api/chat/invalid-id', json={'message': 'test'})
-        # Should handle gracefully (current implementation doesn't validate question_id)
-        assert response.status_code == 200
+        # Should return 404 for invalid question ID
+        assert response.status_code == 404
     
     def test_empty_responses_submission(self, client, sample_feedback_request):
         """Test submitting with no responses."""

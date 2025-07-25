@@ -40,6 +40,9 @@ Since no code exists yet, future development should consider:
 # Install dependencies
 pip install -r requirements.txt
 
+# Set up environment variables (create .env file)
+echo "OPENAI_API_KEY=your-openai-api-key-here" > .env
+
 # Initialize database
 flask db init
 flask db migrate -m "Initial migration"
@@ -94,7 +97,7 @@ flask db downgrade
 - **Backend**: Flask with SQLAlchemy ORM
 - **Database**: SQLite (for development)
 - **Frontend**: Bootstrap 5 with vanilla JavaScript
-- **Chatbot**: Simple rule-based responses (MVP - integrate AI service later)
+- **Chatbot**: OpenAI GPT-3.5-turbo for intelligent conversational follow-ups
 
 ## Project Structure
 
