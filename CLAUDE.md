@@ -51,6 +51,10 @@ flask db upgrade
 
 ### Development
 ```bash
+# Quick start with automatic database setup (recommended)
+python dev.py
+
+# Or manually:
 # Run development server
 python app.py
 # or
@@ -58,6 +62,13 @@ flask run
 
 # The app will be available at http://localhost:5001
 ```
+
+### Development Script Features
+The `dev.py` script automatically:
+- Ensures database migrations are initialized and applied
+- Verifies database tables exist and recreates if corrupted
+- Checks for environment configuration
+- Starts the development server with proper database state
 
 ### Testing
 ```bash
