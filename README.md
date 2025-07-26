@@ -168,8 +168,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Contact
 
 **Project**: [https://github.com/rafeco-etsy/candidly](https://github.com/rafeco-etsy/candidly)
-
----
-
-*Candidly transforms feedback collection from simple surveys into intelligent conversations that gather richer, more actionable insights.*
-EOF < /dev/null
