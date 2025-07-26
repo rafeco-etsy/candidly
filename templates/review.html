@@ -73,6 +73,32 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </div>
             `;
+        } else if (question.question_type === 'agreement') {
+            const agreementValue = response && response.agreement_value !== null ? response.agreement_value : '';
+            const agreementLabels = {
+                'strongly_agree': 'Strongly Agree',
+                'agree': 'Agree', 
+                'disagree': 'Disagree',
+                'strongly_disagree': 'Strongly Disagree',
+                'na': 'N/A'
+            };
+            responseContent = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <strong>Response:</strong> ${agreementLabels[agreementValue] || 'Not answered'}
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" name="agreement_${question.id}">
+                            <option value="">Not answered</option>
+                            <option value="strongly_agree" ${agreementValue === 'strongly_agree' ? 'selected' : ''}>Strongly Agree</option>
+                            <option value="agree" ${agreementValue === 'agree' ? 'selected' : ''}>Agree</option>
+                            <option value="disagree" ${agreementValue === 'disagree' ? 'selected' : ''}>Disagree</option>
+                            <option value="strongly_disagree" ${agreementValue === 'strongly_disagree' ? 'selected' : ''}>Strongly Disagree</option>
+                            <option value="na" ${agreementValue === 'na' ? 'selected' : ''}>N/A</option>
+                        </select>
+                    </div>
+                </div>
+            `;
         } else {
             const summary = response ? response.discussion_summary : 'No response provided';
             

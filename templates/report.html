@@ -31,6 +31,32 @@
                                     <span class="badge bg-secondary fs-6">N/A</span>
                                 {% endif %}
                             </div>
+                        {% elif response.question.question_type == 'agreement' %}
+                            <div class="agreement-display">
+                                {% if response.agreement_value %}
+                                    {% if response.agreement_value == 'strongly_agree' %}
+                                        <span class="badge bg-success fs-6">
+                                            <i class="fas fa-check-double me-1"></i>Strongly Agree
+                                        </span>
+                                    {% elif response.agreement_value == 'agree' %}
+                                        <span class="badge bg-success fs-6">
+                                            <i class="fas fa-check me-1"></i>Agree
+                                        </span>
+                                    {% elif response.agreement_value == 'disagree' %}
+                                        <span class="badge bg-danger fs-6">
+                                            <i class="fas fa-times me-1"></i>Disagree
+                                        </span>
+                                    {% elif response.agreement_value == 'strongly_disagree' %}
+                                        <span class="badge bg-danger fs-6">
+                                            <i class="fas fa-times-circle me-1"></i>Strongly Disagree
+                                        </span>
+                                    {% elif response.agreement_value == 'na' %}
+                                        <span class="badge bg-secondary fs-6">N/A</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-secondary fs-6">N/A</span>
+                                {% endif %}
+                            </div>
                         {% else %}
                             <div class="discussion-response">
                                 {% if response.discussion_summary %}

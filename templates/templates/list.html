@@ -34,6 +34,16 @@
                                         <span class="badge bg-secondary">
                                             {{ template.requests|length }} requests
                                         </span>
+                                        {% if template.is_supervisor_feedback %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-user-tie"></i> Supervisor
+                                        </span>
+                                        {% endif %}
+                                        {% if template.intro_text %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-info-circle"></i> Has Intro
+                                        </span>
+                                        {% endif %}
                                     </div>
                                     <small class="text-muted">
                                         Created {{ template.created_at.strftime('%b %d, %Y') }}

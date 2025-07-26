@@ -7,46 +7,70 @@ import json
 import openai
 import os
 
-def generate_feedback_summary(question_text, chat_history):
+def generate_feedback_summary(question_text, chat_history, is_supervisor_feedback=False):
     """Generate a professional feedback summary from chat conversation using LLM."""
     try:
         from config import Config
         client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
         
-        # Build the conversation context
-        conversation = []
+        # Build the conversation context - focus on user responses
+        user_responses = []
+        full_conversation = []
+        
         for msg in chat_history:
             role = "Assistant" if msg['role'] == 'assistant' else "User"
-            conversation.append(f"{role}: {msg['content']}")
+            full_conversation.append(f"{role}: {msg['content']}")
+            
+            # Collect user responses separately
+            if msg['role'] == 'user':
+                user_responses.append(msg['content'])
         
-        conversation_text = "\n".join(conversation)
+        # Use user responses as primary content, full conversation as context
+        user_content = "\n".join(user_responses)
+        conversation_text = "\n".join(full_conversation)
+        
+        # Build supervisor-specific guidance for summarization
+        supervisor_guidance = ""
+        if is_supervisor_feedback:
+            supervisor_guidance = """
+
+IMPORTANT: This feedback is about a supervisor/manager. When summarizing:
+- Focus on leadership and management behaviors
+- Emphasize examples of team support, communication, and decision-making
+- Balance constructive feedback with positive observations
+- Highlight specific impacts on team dynamics or professional development
+- Use professional language appropriate for management feedback"""
         
         # Create summarization prompt
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=Config.OPENAI_MODEL,
             messages=[
                 {
                     "role": "system",
-                    "content": """You are an expert at summarizing feedback conversations into professional, actionable feedback statements. 
+                    "content": f"""You are an expert at summarizing feedback into professional, actionable statements. 
 
-Your task is to analyze the conversation between a feedback interviewer and someone giving feedback, then create a concise, professional summary that captures the key insights and specifics mentioned.
+Your task is to create a concise, professional summary based on what the feedback giver actually said, not the interviewer's questions.
 
 Guidelines:
-- Focus on concrete examples, behaviors, and impacts mentioned
+- Focus ONLY on the user's actual responses and the concrete examples they provided
+- Do NOT include or reference the interviewer's questions or prompts
 - Maintain a professional, constructive tone
-- Include specific details and examples when provided
-- Keep it concise but comprehensive (2-4 sentences typically)
+- Include specific details and examples when the user mentioned them
+- Keep it concise but comprehensive (1-3 sentences typically)
 - Write in third person as feedback about the person being reviewed
-- Don't include the back-and-forth nature of the conversation, just the key insights"""
+- Base the summary strictly on what the user said, not what was asked{supervisor_guidance}"""
                 },
                 {
                     "role": "user", 
-                    "content": f"""Please summarize this feedback conversation about: "{question_text}"
+                    "content": f"""Please summarize the feedback given about: "{question_text}"
 
-Conversation:
+The feedback giver's responses:
+{user_content}
+
+Full conversation context (for understanding):
 {conversation_text}
 
-Provide a professional feedback summary:"""
+Provide a professional feedback summary based ONLY on what the feedback giver actually said:"""
                 }
             ],
             max_tokens=200,
@@ -92,9 +116,16 @@ def register_routes(app):
         if request.method == 'POST':
             name = request.form['name']
             description = request.form.get('description', '')
+            intro_text = request.form.get('intro_text', '')
+            is_supervisor_feedback = 'is_supervisor_feedback' in request.form
             
             # Create template
-            template = FeedbackTemplate(name=name, description=description)
+            template = FeedbackTemplate(
+                name=name, 
+                description=description,
+                intro_text=intro_text,
+                is_supervisor_feedback=is_supervisor_feedback
+            )
             db.session.add(template)
             db.session.flush()
             
@@ -154,8 +185,9 @@ def register_routes(app):
         chat_history = data.get('chat_history', [])
         feedback_request_id = data.get('feedback_request_id')
         
-        # Get the original question to provide context
+        # Get the original question and template to provide context
         question = Question.query.get_or_404(question_id)
+        template = FeedbackTemplate.query.get_or_404(question.template_id)
         
         try:
             # Initialize OpenAI client
@@ -191,6 +223,18 @@ def register_routes(app):
                 if prior_context:
                     context_info = f"\n\nPrevious questions and responses in this feedback session:\n" + "\n\n".join(prior_context) + "\n\nUse this context to ask more relevant and connected follow-up questions."
             
+            # Build supervisor-specific guidance
+            supervisor_guidance = ""
+            if template.is_supervisor_feedback:
+                supervisor_guidance = """
+
+IMPORTANT: This feedback is about someone's supervisor. Keep in mind:
+- Focus on management and leadership behaviors
+- Ask about communication style, decision-making, team support
+- Encourage specific examples of how they handle challenges or conflicts
+- Be particularly thoughtful about constructive criticism (balance with positive aspects)
+- Consider questions about professional development support, delegation, and team dynamics"""
+
             # Build conversation history for the LLM
             messages = [
                 {
@@ -204,7 +248,7 @@ Guidelines:
 - Keep your responses conversational and supportive
 - When they've provided sufficient detail (usually after 2-3 exchanges), acknowledge their response and ask if there's anything else they'd like to add
 - If they indicate they're done (saying things like "done", "nothing else", "that's all"), respond with "Thank you for that detailed feedback!" to signal completion
-- Reference previous answers when relevant to create a cohesive feedback experience
+- Reference previous answers when relevant to create a cohesive feedback experience{supervisor_guidance}
 
 Be warm, professional, and focused on helping them give the best possible feedback.{context_info}"""
                 }
@@ -225,9 +269,9 @@ Be warm, professional, and focused on helping them give the best possible feedba
             
             # Call OpenAI API
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model=app.config['OPENAI_MODEL'],
                 messages=messages,
-                max_tokens=150,
+                max_tokens=200,
                 temperature=0.7
             )
             
@@ -296,16 +340,22 @@ Be warm, professional, and focused on helping them give the best possible feedba
                     response.rating_value = None if response_data['value'] == '' else (
                         None if response_data['value'] == 'na' else int(response_data['value'])
                     )
+                elif response_data['type'] == 'agreement':
+                    response.agreement_value = None if response_data['value'] == '' else (
+                        None if response_data['value'] == 'na' else response_data['value']
+                    )
                 else:  # discussion
                     response.chat_history = json.dumps(response_data.get('chat_history', []))
                     # Generate AI-powered summary from full conversation
                     chat_history = response_data.get('chat_history', [])
                     if chat_history:
-                        # Get the question text for context
+                        # Get the question text and template for context
                         question_obj = Question.query.get(question_id)
+                        template_obj = FeedbackTemplate.query.get(question_obj.template_id)
                         response.discussion_summary = generate_feedback_summary(
                             question_obj.question_text, 
-                            chat_history
+                            chat_history,
+                            template_obj.is_supervisor_feedback
                         )
                     else:
                         response.discussion_summary = 'No response provided'
@@ -333,6 +383,7 @@ Be warm, professional, and focused on helping them give the best possible feedba
                 'id': r.id,
                 'question_id': r.question_id,
                 'rating_value': r.rating_value,
+                'agreement_value': r.agreement_value,
                 'discussion_summary': r.discussion_summary,
                 'chat_history': r.chat_history
             })

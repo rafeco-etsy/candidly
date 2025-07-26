@@ -42,6 +42,7 @@ pip install -r requirements.txt
 
 # Set up environment variables (create .env file)
 echo "OPENAI_API_KEY=your-openai-api-key-here" > .env
+echo "OPENAI_MODEL=gpt-4o" >> .env
 
 # Initialize database
 flask db init
@@ -108,7 +109,7 @@ flask db downgrade
 - **Backend**: Flask with SQLAlchemy ORM
 - **Database**: SQLite (for development)
 - **Frontend**: Bootstrap 5 with vanilla JavaScript
-- **Chatbot**: OpenAI GPT-3.5-turbo for intelligent conversational follow-ups
+- **Chatbot**: OpenAI GPT-4o for intelligent conversational follow-ups (configurable)
 
 ## Project Structure
 

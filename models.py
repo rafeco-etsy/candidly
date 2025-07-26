@@ -8,6 +8,8 @@ class FeedbackTemplate(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=True)
+    intro_text = db.Column(db.Text, nullable=True)
+    is_supervisor_feedback = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     questions = db.relationship('Question', backref='template', lazy=True)
@@ -25,7 +27,7 @@ class Question(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     template_id = db.Column(db.String(36), db.ForeignKey('feedback_template.id'), nullable=False)
     question_text = db.Column(db.Text, nullable=False)
-    question_type = db.Column(db.String(20), nullable=False)  # 'rating' or 'discussion'
+    question_type = db.Column(db.String(20), nullable=False)  # 'rating', 'agreement', or 'discussion'
     order_index = db.Column(db.Integer, nullable=False)
 
 class Response(db.Model):
@@ -33,6 +35,7 @@ class Response(db.Model):
     feedback_request_id = db.Column(db.String(36), db.ForeignKey('feedback_request.id'), nullable=False)
     question_id = db.Column(db.String(36), db.ForeignKey('question.id'), nullable=False)
     rating_value = db.Column(db.Integer, nullable=True)  # For rating questions
+    agreement_value = db.Column(db.String(20), nullable=True)  # For agreement questions
     discussion_summary = db.Column(db.Text, nullable=True)  # For discussion questions
     chat_history = db.Column(db.Text, nullable=True)  # JSON string of chat messages
     is_draft = db.Column(db.Boolean, default=True)

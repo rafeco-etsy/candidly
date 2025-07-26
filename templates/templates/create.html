@@ -26,6 +26,22 @@
                     </div>
 
                     <div class="mb-4">
+                        <label for="intro_text" class="form-label">Introduction Text (Optional)</label>
+                        <textarea class="form-control" id="intro_text" name="intro_text" rows="3"></textarea>
+                        <div class="form-text">Introductory text shown to feedback givers before they start the survey. Supports multiple paragraphs.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_supervisor_feedback" name="is_supervisor_feedback" value="1">
+                            <label class="form-check-label" for="is_supervisor_feedback">
+                                This is supervisor feedback
+                            </label>
+                        </div>
+                        <div class="form-text">Check this if the feedback is about someone's supervisor. This helps the AI provide more appropriate guidance.</div>
+                    </div>
+
+                    <div class="mb-4">
                         <h5>Questions</h5>
                         <div id="questions-container">
                             <div class="question-item border rounded p-3 mb-3">
@@ -36,6 +52,7 @@
                                     <div class="col-md-4">
                                         <select class="form-select" name="question_types">
                                             <option value="rating">Rating (1-5)</option>
+                                            <option value="agreement">Agreement Scale</option>
                                             <option value="discussion">Discussion</option>
                                         </select>
                                     </div>
@@ -79,6 +96,7 @@ document.getElementById('add-question').addEventListener('click', function() {
             <div class="col-md-4">
                 <select class="form-select" name="question_types">
                     <option value="rating">Rating (1-5)</option>
+                    <option value="agreement">Agreement Scale</option>
                     <option value="discussion">Discussion</option>
                 </select>
             </div>

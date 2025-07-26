@@ -12,6 +12,18 @@
                 </h4>
             </div>
             <div class="card-body">
+                {% if feedback_request.template.intro_text %}
+                <div class="mb-4">
+                    <div class="intro-text">
+                        {% for paragraph in feedback_request.template.intro_text.split('\n\n') %}
+                            {% if paragraph.strip() %}
+                            <p class="mb-3">{{ paragraph.strip() }}</p>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
                     <strong>Privacy Notice:</strong> Your responses will be reviewed by you before submission. 
@@ -34,6 +46,40 @@
                                     <input type="radio" class="btn-check" name="rating_{{ question.id }}" 
                                            id="rating_{{ question.id }}_na" value="na">
                                     <label class="btn btn-outline-secondary" for="rating_{{ question.id }}_na">N/A</label>
+                                </div>
+                            </div>
+                        {% elif question.question_type == 'agreement' %}
+                            <div class="agreement-section">
+                                <div class="btn-group-vertical d-grid gap-2" role="group">
+                                    <input type="radio" class="btn-check" name="agreement_{{ question.id }}" 
+                                           id="agreement_{{ question.id }}_strongly_agree" value="strongly_agree">
+                                    <label class="btn btn-outline-success" for="agreement_{{ question.id }}_strongly_agree">
+                                        <i class="fas fa-check-double me-2"></i>Strongly Agree
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="agreement_{{ question.id }}" 
+                                           id="agreement_{{ question.id }}_agree" value="agree">
+                                    <label class="btn btn-outline-success" for="agreement_{{ question.id }}_agree">
+                                        <i class="fas fa-check me-2"></i>Agree
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="agreement_{{ question.id }}" 
+                                           id="agreement_{{ question.id }}_disagree" value="disagree">
+                                    <label class="btn btn-outline-danger" for="agreement_{{ question.id }}_disagree">
+                                        <i class="fas fa-times me-2"></i>Disagree
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="agreement_{{ question.id }}" 
+                                           id="agreement_{{ question.id }}_strongly_disagree" value="strongly_disagree">
+                                    <label class="btn btn-outline-danger" for="agreement_{{ question.id }}_strongly_disagree">
+                                        <i class="fas fa-times-circle me-2"></i>Strongly Disagree
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="agreement_{{ question.id }}" 
+                                           id="agreement_{{ question.id }}_na" value="na">
+                                    <label class="btn btn-outline-secondary" for="agreement_{{ question.id }}_na">
+                                        <i class="fas fa-question me-2"></i>N/A
+                                    </label>
                                 </div>
                             </div>
                         {% else %}
@@ -180,10 +226,19 @@ document.getElementById('review-responses').addEventListener('click', function()
     const responses = {};
     
     // Collect rating responses
-    document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+    document.querySelectorAll('input[name^="rating_"]:checked').forEach(input => {
         const questionId = input.name.split('_')[1];
         responses[questionId] = {
             type: 'rating',
+            value: input.value
+        };
+    });
+    
+    // Collect agreement responses
+    document.querySelectorAll('input[name^="agreement_"]:checked').forEach(input => {
+        const questionId = input.name.split('_')[1];
+        responses[questionId] = {
+            type: 'agreement',
             value: input.value
         };
     });

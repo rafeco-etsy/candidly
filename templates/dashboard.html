@@ -49,6 +49,11 @@
                                             <span class="badge bg-primary">
                                                 <i class="fas fa-clipboard-list me-1"></i>{{ item.request.template.name }}
                                             </span>
+                                            {% if item.request.template.is_supervisor_feedback %}
+                                            <br><span class="badge bg-warning text-dark mt-1">
+                                                <i class="fas fa-user-tie me-1"></i>Supervisor
+                                            </span>
+                                            {% endif %}
                                         {% else %}
                                             <span class="badge bg-secondary">
                                                 <i class="fas fa-edit me-1"></i>Custom
