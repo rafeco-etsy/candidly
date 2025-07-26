@@ -103,9 +103,16 @@
                                                    class="btn btn-outline-success" title="View Report">
                                                     <i class="fas fa-chart-line"></i>
                                                 </a>
+                                                <a href="{{ url_for('coaching_guide', request_id=item.request.id) }}" 
+                                                   class="btn btn-outline-warning" title="Delivery Coaching Guide">
+                                                    <i class="fas fa-graduation-cap"></i>
+                                                </a>
                                             {% else %}
                                                 <button class="btn btn-outline-secondary" disabled title="No responses yet">
                                                     <i class="fas fa-chart-line"></i>
+                                                </button>
+                                                <button class="btn btn-outline-secondary" disabled title="No responses yet">
+                                                    <i class="fas fa-graduation-cap"></i>
                                                 </button>
                                             {% endif %}
                                             <a href="{{ url_for('survey', request_id=item.request.id) }}" 

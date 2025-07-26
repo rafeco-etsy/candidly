@@ -7,6 +7,175 @@ import json
 import openai
 import os
 
+def generate_personalized_coaching(feedback_request, responses, safety_analysis):
+    """Generate personalized coaching content based on actual feedback and relationship dynamics."""
+    try:
+        from config import Config
+        client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+        
+        # Collect feedback content with context
+        feedback_items = []
+        for response in responses:
+            question = Question.query.get(response.question_id)
+            if response.discussion_summary:
+                feedback_items.append(f"Question: {question.question_text}\nYour feedback: {response.discussion_summary}")
+            elif response.rating_value:
+                feedback_items.append(f"Question: {question.question_text}\nYour rating: {response.rating_value}/5")
+            elif response.agreement_value:
+                agreement_labels = {
+                    'strongly_agree': 'Strongly Agree',
+                    'agree': 'Agree', 
+                    'disagree': 'Disagree',
+                    'strongly_disagree': 'Strongly Disagree',
+                    'na': 'N/A'
+                }
+                feedback_items.append(f"Question: {question.question_text}\nYour response: {agreement_labels.get(response.agreement_value, response.agreement_value)}")
+        
+        feedback_content = "\n\n".join(feedback_items)
+        relationship_type = "supervisor" if feedback_request.template.is_supervisor_feedback else "peer/colleague"
+        target_name = feedback_request.target_name
+        safety_level = safety_analysis['safety_level']
+        
+        # Build comprehensive coaching prompt
+        response = client.chat.completions.create(
+            model=Config.OPENAI_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"""You are an expert executive coach specializing in difficult conversations and workplace feedback delivery. Generate a personalized coaching guide for someone who needs to deliver feedback they wrote to their {relationship_type}.
+
+The coaching should be:
+- Specific to the actual feedback content provided
+- Mindful of the relationship dynamics and power structure
+- Practical and actionable
+- Psychologically safe given the assessed risk level: {safety_level}
+
+Structure your response with these sections:
+1. **Personalized Assessment** - Brief analysis of their specific situation
+2. **Preparation Strategy** - Tailored preparation advice
+3. **Opening Approach** - Specific opening script suggestions 
+4. **Delivery Guidance** - How to share each piece of feedback
+5. **Handling Reactions** - Anticipated responses and how to navigate them
+6. **Closing & Next Steps** - How to end constructively
+
+Write in second person ("you should...") as direct coaching advice. Be specific to their actual feedback content, not generic."""
+                },
+                {
+                    "role": "user",
+                    "content": f"""I need coaching on delivering feedback to {target_name}, who is my {relationship_type}. 
+
+Here's the feedback I wrote:
+
+{feedback_content}
+
+Safety assessment: {safety_level} risk level
+{"Specific concerns: " + ", ".join(safety_analysis.get('concerns', [])) if safety_analysis.get('concerns') else ""}
+
+Please provide personalized coaching for delivering this specific feedback in this relationship context."""
+                }
+            ],
+            max_tokens=1200,
+            temperature=0.4
+        )
+        
+        return response.choices[0].message.content.strip()
+        
+    except Exception as e:
+        print(f"Error generating personalized coaching: {e}")
+        # Fallback to basic guidance
+        relationship_type = "supervisor" if feedback_request.template.is_supervisor_feedback else "colleague"
+        return f"""# Personalized Coaching Guide
+
+## Your Situation
+You have feedback to deliver to {feedback_request.target_name}, your {relationship_type}. Based on your feedback content, approach this conversation thoughtfully.
+
+## Preparation
+- Choose a private, comfortable setting
+- Plan for 20-30 minutes of conversation
+- Review your specific feedback points beforehand
+- Prepare to listen to their perspective
+
+## Opening the Conversation
+"Hi {feedback_request.target_name}, I'd like to share some observations about our working relationship. My goal is to improve how we collaborate together. Would you be open to hearing my perspective?"
+
+## Delivery Approach
+- Share your specific observations using "I" statements
+- Focus on behaviors and impacts, not personality
+- Ask for their perspective after each point
+- Be prepared to listen and understand their viewpoint
+
+## Next Steps
+- Summarize any agreements or insights
+- Identify specific actions you can both take
+- Schedule follow-up if needed
+- Thank them for their openness"""
+
+def analyze_feedback_safety(responses, is_supervisor_feedback=False):
+    """Analyze feedback content to assess psychological safety and relationship dynamics."""
+    try:
+        from config import Config
+        client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+        
+        # Collect all feedback content
+        feedback_content = []
+        for response in responses:
+            if response.discussion_summary:
+                feedback_content.append(response.discussion_summary)
+            elif response.rating_value and response.rating_value <= 2:
+                feedback_content.append(f"Low rating ({response.rating_value}/5) given")
+            elif response.agreement_value in ['disagree', 'strongly_disagree']:
+                feedback_content.append(f"Disagreement expressed ({response.agreement_value})")
+        
+        if not feedback_content:
+            return {
+                'safety_level': 'high',
+                'concerns': [],
+                'suggestions': ['This appears to be positive feedback that should be comfortable to deliver directly.']
+            }
+        
+        feedback_text = "\n".join(feedback_content)
+        relationship_context = "supervisor/manager" if is_supervisor_feedback else "peer or colleague"
+        
+        response = client.chat.completions.create(
+            model=Config.OPENAI_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"""You are an expert in workplace psychology and feedback delivery. Analyze this feedback content to assess how comfortable and safe it would be for the feedback giver to deliver this directly to their {relationship_context}.
+
+Consider:
+- Power dynamics and hierarchy
+- Constructive vs critical tone
+- Specific vs vague feedback
+- Emotional safety concerns
+- Potential for defensiveness
+
+Respond with a JSON object containing:
+- safety_level: "high" (comfortable to deliver), "medium" (some concerns), or "low" (significant concerns)
+- concerns: array of specific concerns about direct delivery
+- suggestions: array of specific recommendations for safe delivery"""
+                },
+                {
+                    "role": "user",
+                    "content": f"Analyze this feedback content for delivery to a {relationship_context}:\n\n{feedback_text}"
+                }
+            ],
+            max_tokens=300,
+            temperature=0.3
+        )
+        
+        import json
+        return json.loads(response.choices[0].message.content.strip())
+        
+    except Exception as e:
+        print(f"Error analyzing feedback safety: {e}")
+        # Conservative fallback
+        return {
+            'safety_level': 'medium',
+            'concerns': ['Unable to assess feedback content automatically'],
+            'suggestions': ['Consider having this conversation in a private, comfortable setting']
+        }
+
 def generate_feedback_summary(question_text, chat_history, is_supervisor_feedback=False):
     """Generate a professional feedback summary from chat conversation using LLM."""
     try:
@@ -433,6 +602,25 @@ Be warm, professional, and focused on helping them give the best possible feedba
         feedback_request = FeedbackRequest.query.get_or_404(request_id)
         responses = Response.query.filter_by(feedback_request_id=request_id, is_draft=False).all()
         return render_template('report.html', feedback_request=feedback_request, responses=responses)
+
+    @app.route('/coaching/<request_id>')
+    def coaching_guide(request_id):
+        feedback_request = FeedbackRequest.query.get_or_404(request_id)
+        responses = Response.query.filter_by(feedback_request_id=request_id, is_draft=False).all()
+        questions = Question.query.filter_by(template_id=feedback_request.template_id).order_by(Question.order_index).all()
+        
+        # Analyze feedback safety and relationship dynamics
+        safety_analysis = analyze_feedback_safety(responses, feedback_request.template.is_supervisor_feedback)
+        
+        # Generate personalized coaching content
+        coaching_content = generate_personalized_coaching(feedback_request, responses, safety_analysis)
+        
+        return render_template('coaching.html', 
+                             feedback_request=feedback_request, 
+                             responses=responses, 
+                             questions=questions,
+                             safety_analysis=safety_analysis,
+                             coaching_content=coaching_content)
 
 # Create the app instance
 app = create_app()
