@@ -4,34 +4,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Candidly is a peer feedback collection tool with conversational follow-ups. The system uses a chatbot to conduct dynamic interviews for open-ended feedback questions, then compiles and summarizes responses for review before final submission.
+Candidly is a peer feedback collection tool with conversational follow-ups. The system uses an AI chatbot to conduct dynamic interviews for open-ended feedback questions, then organizes and preserves responses for review before final submission. The system includes advanced features like regeneratable summaries with prompt editing, comprehensive markdown rendering, user authentication, and coaching guides.
 
 ## Core Architecture
 
-This is an early-stage project currently containing only product requirements. The system will need to implement:
+Candidly is a fully-implemented feedback collection system with the following components:
 
 ### Key Components
-- **Survey Builder**: Create feedback requests with rating and discussion questions
-- **Chatbot Interface**: AI-powered conversational follow-ups for discussion questions  
-- **Response Summarization**: Convert chat conversations into concise feedback summaries
-- **Review Interface**: Allow feedback givers to edit responses before submission
-- **Feedback Compilation**: Generate structured reports for feedback requestors
+- **User Authentication**: Flask-Login with role-based permissions (admins, template creators, users)
+- **Template System**: Create reusable feedback templates with rating, agreement, and discussion questions
+- **Survey Builder**: Create feedback requests with mixed question types and user assignment
+- **AI Chatbot Interface**: GPT-4o powered conversational follow-ups for discussion questions
+- **Response Organization**: AI organizes chat conversations while preserving ALL user content
+- **Regenerate Feature**: Users can edit AI prompts directly to customize feedback organization
+- **Review Interface**: Comprehensive review with markdown rendering and inline editing
+- **Coaching Guides**: AI-generated personalized coaching for delivering feedback
+- **Dashboard**: User-specific view of created and assigned feedback requests
 
 ### Data Flow
-1. Feedback requestor creates survey with mixed question types
-2. Feedback giver answers rating questions directly
-3. Discussion questions trigger chatbot conversations with dynamic follow-ups
-4. System summarizes chat into professional feedback statements
-5. Feedback giver reviews/edits compiled draft before submission
-6. Final responses stored and made available to requestor
+1. User creates feedback template or request with mixed question types
+2. Feedback giver answers rating/agreement questions directly
+3. Discussion questions trigger AI conversations with expanding text areas
+4. System organizes chat into comprehensive feedback while preserving all details
+5. Feedback giver reviews organized responses with full chat transcript access
+6. Optional: Regenerate summaries by editing AI prompts directly
+7. Final responses submitted and available in structured reports with coaching guides
 
-## Technical Considerations
+## Technical Implementation
 
-Since no code exists yet, future development should consider:
-- Real-time chat interface for smooth conversational experience
-- AI integration for follow-up question generation and response summarization
-- Session management to preserve progress across questions
-- Privacy controls for anonymous feedback when configured
+The system is fully implemented with the following features:
+- **Real-time chat interface**: Smooth conversational experience with expanding text areas
+- **AI integration**: GPT-4o for follow-up questions and response organization
+- **Session management**: Preserves progress across questions with draft responses
+- **Markdown rendering**: Professional formatting using marked.js library
+- **User authentication**: Role-based permissions and secure session management
+- **Prompt transparency**: Users can view and edit AI instructions directly
+- **Full conversation storage**: Complete chat history for debugging and transparency
 
 ## Commands
 
@@ -114,29 +122,51 @@ flask db downgrade
 
 ## Tech Stack
 
-- **Backend**: Flask with SQLAlchemy ORM
-- **Database**: SQLite (for development)
-- **Frontend**: Bootstrap 5 with vanilla JavaScript
-- **Chatbot**: OpenAI GPT-4o for intelligent conversational follow-ups (configurable)
+- **Backend**: Flask with SQLAlchemy ORM, Flask-Login for authentication
+- **Database**: SQLite (for development), with comprehensive migration system
+- **Frontend**: Bootstrap 5 with vanilla JavaScript, Marked.js for markdown rendering
+- **AI**: OpenAI GPT-4o for intelligent conversational follow-ups and response organization
+- **Testing**: Comprehensive pytest suite with fixtures and integration tests
 
 ## Project Structure
 
 ```
 candidly/
-├── app.py              # Main Flask application
+├── app.py              # Main Flask application with all routes and AI integration
+├── models.py           # Database models (User, FeedbackTemplate, Question, Response, etc.)
+├── auth.py             # Authentication system and permissions
 ├── config.py           # Configuration settings
+├── dev.py              # Development setup script
 ├── requirements.txt    # Python dependencies
-├── app/
-│   └── models.py      # Database models
-├── templates/         # Jinja2 HTML templates
-├── static/           # CSS, JS, images
-└── migrations/       # Database migration files
+├── templates/          # Jinja2 HTML templates
+│   ├── base.html      # Base template with Bootstrap and marked.js
+│   ├── coaching.html  # AI-generated coaching guides
+│   ├── report.html    # Feedback reports with regenerate feature
+│   └── survey.html    # Survey interface with AI chat
+├── tests/             # Comprehensive test suite
+└── migrations/        # Database migration files
 ```
 
 ## Development Notes
 
-- PRD emphasizes simplicity and minimal cognitive load
-- Performance requirement for low-latency chatbot responses
-- MVP excludes authentication, notifications, and complex analytics
-- Focus on single-page survey flow with clear review/confirmation step
-- Chatbot uses simple rule-based responses for MVP (replace with AI integration later)
+- **Focus on simplicity**: Minimal cognitive load with clear user flows
+- **Performance optimized**: Low-latency AI responses with focused single questions
+- **Full authentication**: Role-based user system with permissions
+- **AI-powered organization**: Preserves ALL user content while organizing professionally
+- **Transparency**: Users can view and edit AI prompts directly
+- **Extensible design**: Markdown rendering, comprehensive testing, and modular architecture
+- **Regenerate feature**: Allows customization of feedback organization post-submission
+
+## Key Features for Development
+
+### Regenerate Summary System
+- **API Endpoints**: `/api/get-prompt/<response_id>` and `/api/regenerate-summary/<response_id>`
+- **Inline Editing**: Users can modify AI prompts directly in the UI
+- **Real-time Updates**: Immediate feedback organization with loading states
+- **Markdown Support**: Professional formatting for all AI-generated content
+
+### AI Integration Best Practices
+- **Focused Questions**: AI asks ONE question at a time for better user experience
+- **Content Preservation**: Organization over summarization to keep all details
+- **Context Awareness**: AI references previous responses for cohesive conversations
+- **Customizable Prompts**: Users can edit instructions for personalized organization

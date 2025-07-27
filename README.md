@@ -2,24 +2,34 @@
 
 An AI-powered peer feedback collection tool that uses conversational follow-ups to gather detailed, thoughtful feedback through intelligent chat conversations.
 
-![Candidly Demo](https://img.shields.io/badge/Status-Active-brightgreen) ![Python](https://img.shields.io/badge/Python-3.13-blue) ![Flask](https://img.shields.io/badge/Flask-2.3.3-red) ![OpenAI](https://img.shields.io/badge/OpenAI-GPT--3.5--turbo-orange)
+![Candidly Demo](https://img.shields.io/badge/Status-Active-brightgreen) ![Python](https://img.shields.io/badge/Python-3.13-blue) ![Flask](https://img.shields.io/badge/Flask-2.3.3-red) ![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-orange)
 
 ## ✨ Features
 
 ### 🤖 AI-Powered Conversations
-- **Intelligent Follow-ups**: GPT-3.5-turbo conducts natural conversations to gather detailed feedback
+- **Intelligent Follow-ups**: GPT-4o conducts natural conversations to gather detailed feedback
 - **Contextual Awareness**: AI remembers all previous questions and answers for connected conversations
-- **Professional Summarization**: Converts chat conversations into polished feedback statements
+- **Verbose Organization**: Preserves ALL user content while organizing it professionally
+- **Regenerate Summaries**: Edit AI prompts directly to customize how feedback is organized
 
 ### 📝 Flexible Survey Building
 - **Template System**: Create reusable feedback templates with rating and discussion questions
 - **Mixed Question Types**: Combine quick ratings (1-5 scale) with in-depth discussion questions
 - **Dashboard Management**: View all feedback requests and their status at a glance
+- **User Authentication**: Role-based permissions for template creation and request management
 
-### 🔍 Review & Edit Process
-- **Smart Summaries**: AI-generated professional feedback from conversational exchanges
+### 🔍 Advanced Review & Edit Process
+- **Smart Organization**: AI-powered feedback organization that preserves all details and examples
+- **Inline Prompt Editing**: See and modify the exact AI instructions used for organizing feedback
+- **Markdown Rendering**: Professional formatting with headers, bullet points, and emphasis
+- **Full Chat Transcripts**: Collapsible conversation history for transparency and debugging
 - **Review Before Submit**: Users can review and edit all responses before final submission
-- **Privacy Controls**: Built-in review step ensures feedback accuracy
+
+### 🎯 Enhanced User Experience
+- **Expanding Text Areas**: Multi-line input with keyboard shortcuts (Ctrl+Enter to send)
+- **Real-time Updates**: Live feedback organization with loading states
+- **Professional Reports**: Print-ready feedback reports with structured formatting
+- **Coaching Guides**: AI-generated guidance for delivering feedback effectively
 
 ## 🚀 Quick Start
 
@@ -96,11 +106,11 @@ flask db upgrade
 - **Template System**: Reusable feedback question sets with dashboard management
 
 ### Tech Stack
-- **Backend**: Flask with SQLAlchemy ORM
+- **Backend**: Flask with SQLAlchemy ORM, Flask-Login for authentication
 - **Database**: SQLite (development) / PostgreSQL (production ready)
-- **Frontend**: Bootstrap 5 with vanilla JavaScript
-- **AI**: OpenAI GPT-3.5-turbo for conversations and summarization
-- **Testing**: pytest with Flask-testing
+- **Frontend**: Bootstrap 5 with vanilla JavaScript, Marked.js for markdown rendering
+- **AI**: OpenAI GPT-4o for conversations and feedback organization
+- **Testing**: pytest with Flask-testing and comprehensive test coverage
 
 ### Data Flow
 1. **Template Creation**: Define reusable question sets
@@ -120,10 +130,11 @@ flask db upgrade
 
 ### Feedback Collection Flow
 1. **Start Survey**: Recipient gets link to feedback form
-2. **Answer Ratings**: Quick 1-5 scale responses
-3. **Chat Discussions**: AI-guided conversations for detailed feedback
-4. **Review Responses**: Edit AI-generated summaries if needed
-5. **Submit**: Final feedback delivered to requestor
+2. **Answer Ratings**: Quick 1-5 scale responses with N/A options
+3. **Chat Discussions**: AI-guided conversations with expanding text areas
+4. **Review Responses**: Edit AI-organized feedback with inline prompt editing
+5. **Regenerate**: Customize AI prompts to change how feedback is organized
+6. **Submit**: Final feedback delivered with full chat transcripts available
 
 ### Example AI Conversation
 ```
@@ -137,8 +148,10 @@ User: Yes, during the project last month they really helped coordinate between t
 Assistant: That sounds valuable! What specific actions did they take to coordinate effectively?
 ```
 
-**Generated Summary**: 
-> "They demonstrate strong collaboration skills, particularly excelling at cross-team coordination. During recent projects, they effectively facilitated communication between different teams, taking specific actions to ensure smooth project execution and successful outcomes."
+**Generated Organization**: 
+> "They demonstrate strong collaboration skills, particularly excelling at cross-team coordination. During a recent project last month, they effectively facilitated communication between different teams, taking specific actions to coordinate efforts and ensure smooth project execution. Their collaborative approach helps bridge gaps between departments and contributes to successful project outcomes."
+
+**With Regenerate Feature**: Users can edit the AI prompt to change organization style (more formal, bullet points, focus on specific aspects, etc.)
 
 ## 🤝 Contributing
 
