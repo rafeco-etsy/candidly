@@ -93,15 +93,19 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="input-group">
-                                    <input type="text" class="form-control chat-input" 
-                                           placeholder="Type your response..." 
-                                           data-question-id="{{ question.id }}">
-                                    <button class="btn btn-primary send-message" type="button" 
-                                            data-question-id="{{ question.id }}">Send</button>
+                                <div class="mb-2">
+                                    <textarea class="form-control chat-input" 
+                                              rows="3"
+                                              placeholder="Type your response... (Press Ctrl+Enter to send)"
+                                              data-question-id="{{ question.id }}"
+                                              style="resize: vertical; min-height: 80px;"></textarea>
                                 </div>
-                                <div class="mt-2">
-                                    <small class="text-muted">Type your response and I'll ask follow-up questions to help you provide more detailed feedback.</small>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">I'll ask follow-up questions to help you provide detailed feedback.</small>
+                                    <button class="btn btn-primary send-message" type="button" 
+                                            data-question-id="{{ question.id }}">
+                                        <i class="fas fa-paper-plane me-1"></i>Send
+                                    </button>
                                 </div>
                             </div>
                         {% endif %}
@@ -127,28 +131,38 @@ let chatData = {};
 document.querySelectorAll('.send-message').forEach(button => {
     button.addEventListener('click', function() {
         const questionId = this.dataset.questionId;
-        const input = document.querySelector(`input[data-question-id="${questionId}"]`);
-        const message = input.value.trim();
+        const textarea = document.querySelector(`textarea[data-question-id="${questionId}"]`);
+        const message = textarea.value.trim();
         
         if (message) {
             sendChatMessage(questionId, message);
-            input.value = '';
+            textarea.value = '';
+            textarea.style.height = 'auto'; // Reset height
+            textarea.style.height = (textarea.scrollHeight) + 'px'; // Adjust to content
         }
     });
 });
 
-document.querySelectorAll('.chat-input').forEach(input => {
-    input.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault(); // Prevent form submission
+document.querySelectorAll('.chat-input').forEach(textarea => {
+    textarea.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && e.ctrlKey) {
+            e.preventDefault(); // Prevent default behavior
             const questionId = this.dataset.questionId;
             const message = this.value.trim();
             
             if (message) {
                 sendChatMessage(questionId, message);
                 this.value = '';
+                this.style.height = 'auto'; // Reset height
+                this.style.height = (this.scrollHeight) + 'px'; // Adjust to content
             }
         }
+    });
+    
+    // Auto-resize textarea as user types
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
     });
 });
 

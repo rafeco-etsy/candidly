@@ -179,7 +179,11 @@ Respond with a JSON object containing:
         }
 
 def generate_feedback_summary(question_text, chat_history, is_supervisor_feedback=False):
-    """Generate a professional feedback summary from chat conversation using LLM."""
+    """Generate a professional, organized feedback summary from chat conversation using LLM."""
+    return generate_feedback_summary_with_custom_prompt(question_text, chat_history, is_supervisor_feedback, "")
+
+def generate_feedback_summary_with_edited_prompt(question_text, chat_history, edited_prompt):
+    """Generate a professional, organized feedback summary using a user-edited prompt."""
     try:
         from config import Config
         client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
@@ -200,40 +204,17 @@ def generate_feedback_summary(question_text, chat_history, is_supervisor_feedbac
         user_content = "\n".join(user_responses)
         conversation_text = "\n".join(full_conversation)
         
-        # Build supervisor-specific guidance for summarization
-        supervisor_guidance = ""
-        if is_supervisor_feedback:
-            supervisor_guidance = """
-
-IMPORTANT: This feedback is about a supervisor/manager. When summarizing:
-- Focus on leadership and management behaviors
-- Emphasize examples of team support, communication, and decision-making
-- Balance constructive feedback with positive observations
-- Highlight specific impacts on team dynamics or professional development
-- Use professional language appropriate for management feedback"""
-        
-        # Create summarization prompt
+        # Use the edited prompt directly
         response = client.chat.completions.create(
             model=Config.OPENAI_MODEL,
             messages=[
                 {
                     "role": "system",
-                    "content": f"""You are an expert at summarizing feedback into professional, actionable statements. 
-
-Your task is to create a concise, professional summary based on what the feedback giver actually said, not the interviewer's questions.
-
-Guidelines:
-- Focus ONLY on the user's actual responses and the concrete examples they provided
-- Do NOT include or reference the interviewer's questions or prompts
-- Maintain a professional, constructive tone
-- Include specific details and examples when the user mentioned them
-- Keep it concise but comprehensive (1-3 sentences typically)
-- Write in third person as feedback about the person being reviewed
-- Base the summary strictly on what the user said, not what was asked{supervisor_guidance}"""
+                    "content": edited_prompt
                 },
                 {
                     "role": "user", 
-                    "content": f"""Please summarize the feedback given about: "{question_text}"
+                    "content": f"""Please organize and clean up the feedback given about: "{question_text}"
 
 The feedback giver's responses:
 {user_content}
@@ -241,10 +222,99 @@ The feedback giver's responses:
 Full conversation context (for understanding):
 {conversation_text}
 
-Provide a professional feedback summary based ONLY on what the feedback giver actually said:"""
+Provide a well-organized, comprehensive feedback summary that preserves ALL the details and examples the user provided:"""
                 }
             ],
-            max_tokens=200,
+            max_tokens=400,
+            temperature=0.3
+        )
+        
+        return response.choices[0].message.content.strip()
+        
+    except Exception as e:
+        print(f"Error generating feedback summary with edited prompt: {e}")
+        # Fallback to simple concatenation
+        user_messages = [msg['content'] for msg in chat_history if msg['role'] == 'user']
+        return ' '.join(user_messages) if user_messages else 'No response provided'
+
+def generate_feedback_summary_with_custom_prompt(question_text, chat_history, is_supervisor_feedback=False, custom_prompt=""):
+    """Generate a professional, organized feedback summary with optional custom instructions."""
+    try:
+        from config import Config
+        client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+        
+        # Build the conversation context - focus on user responses
+        user_responses = []
+        full_conversation = []
+        
+        for msg in chat_history:
+            role = "Assistant" if msg['role'] == 'assistant' else "User"
+            full_conversation.append(f"{role}: {msg['content']}")
+            
+            # Collect user responses separately
+            if msg['role'] == 'user':
+                user_responses.append(msg['content'])
+        
+        # Use user responses as primary content, full conversation as context
+        user_content = "\n".join(user_responses)
+        conversation_text = "\n".join(full_conversation)
+        
+        # Build supervisor-specific guidance for organization
+        supervisor_guidance = ""
+        if is_supervisor_feedback:
+            supervisor_guidance = """
+
+IMPORTANT: This feedback is about a supervisor/manager. When organizing:
+- Focus on leadership and management behaviors
+- Emphasize examples of team support, communication, and decision-making
+- Balance constructive feedback with positive observations
+- Highlight specific impacts on team dynamics or professional development
+- Use professional language appropriate for management feedback"""
+        
+        # Add custom prompt instructions if provided
+        custom_instructions = ""
+        if custom_prompt:
+            custom_instructions = f"""
+
+CUSTOM INSTRUCTIONS: {custom_prompt}
+
+Follow these specific instructions in addition to the general guidelines above."""
+        
+        # Create organization prompt
+        response = client.chat.completions.create(
+            model=Config.OPENAI_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": f"""You are an expert at organizing and cleaning up feedback into professional, comprehensive statements. 
+
+Your task is to organize and clean up what the feedback giver said while preserving ALL their content and meaning.
+
+Guidelines:
+- Focus ONLY on the user's actual responses and preserve ALL their examples and details
+- Do NOT include or reference the interviewer's questions or prompts
+- Clean up grammar, flow, and organization but preserve ALL substantive content
+- Include ALL specific details, examples, and stories the user mentioned
+- Organize the content logically but keep it comprehensive and detailed
+- Write in third person as feedback about the person being reviewed
+- This should be MORE verbose than the original, not less - organize and expand rather than summarize
+- Aim for 3-6 sentences or more to capture all nuance and detail
+- Base the organized feedback strictly on what the user said, including all their examples{supervisor_guidance}{custom_instructions}"""
+                },
+                {
+                    "role": "user", 
+                    "content": f"""Please organize and clean up the feedback given about: "{question_text}"
+
+The feedback giver's responses:
+{user_content}
+
+Full conversation context (for understanding):
+{conversation_text}
+
+Provide a well-organized, comprehensive feedback summary that preserves ALL the details and examples the user provided:"""
+                }
+            ],
+            max_tokens=400,
             temperature=0.3
         )
         
@@ -263,6 +333,17 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate = Migrate(app, db)
     init_auth(app)
+    
+    # Add custom template filters
+    @app.template_filter('from_json')
+    def from_json_filter(value):
+        """Parse JSON string to Python object."""
+        if not value:
+            return []
+        try:
+            return json.loads(value)
+        except:
+            return []
     
     # Auto-login dev user on every request in dev mode
     @app.before_request
@@ -484,15 +565,15 @@ IMPORTANT: This feedback is about someone's supervisor. Keep in mind:
                     "content": f"""You are a skilled feedback interviewer helping someone provide detailed, constructive feedback. Your goal is to help them give comprehensive and thoughtful responses about: "{question.question_text}"
 
 Guidelines:
-- Ask thoughtful follow-up questions to encourage depth and specificity
+- Ask ONE focused follow-up question at a time to encourage depth and specificity
 - Help them provide concrete examples and details
 - Guide them toward constructive, actionable feedback
-- Keep your responses conversational and supportive
+- Keep your responses brief, conversational and supportive
 - When they've provided sufficient detail (usually after 2-3 exchanges), acknowledge their response and ask if there's anything else they'd like to add
 - If they indicate they're done (saying things like "done", "nothing else", "that's all"), respond with "Thank you for that detailed feedback!" to signal completion
 - Reference previous answers when relevant to create a cohesive feedback experience{supervisor_guidance}
 
-Be warm, professional, and focused on helping them give the best possible feedback.{context_info}"""
+IMPORTANT: Always respond with just ONE question or acknowledgment. Keep responses concise and focused.{context_info}"""
                 }
             ]
             
@@ -513,7 +594,7 @@ Be warm, professional, and focused on helping them give the best possible feedba
             response = client.chat.completions.create(
                 model=app.config['OPENAI_MODEL'],
                 messages=messages,
-                max_tokens=200,
+                max_tokens=100,
                 temperature=0.7
             )
             
@@ -731,6 +812,119 @@ Be warm, professional, and focused on helping them give the best possible feedba
                              safety_analysis=safety_analysis,
                              coaching_content=coaching_content,
                              user=user)
+
+    @app.route('/api/regenerate-summary/<response_id>', methods=['POST'])
+    @login_required
+    def regenerate_summary(response_id):
+        user = ensure_authenticated()
+        if not user:
+            return jsonify({'success': False, 'error': 'Authentication required'}), 401
+            
+        response = Response.query.get_or_404(response_id)
+        feedback_request = FeedbackRequest.query.get_or_404(response.feedback_request_id)
+        
+        # Check if user can access this request
+        if not can_access_request(feedback_request, user):
+            return jsonify({'success': False, 'error': 'Permission denied'}), 403
+        
+        data = request.get_json()
+        custom_prompt = data.get('custom_prompt', '').strip()
+        edited_prompt = data.get('edited_prompt', '').strip()
+        
+        try:
+            # Get the question and chat history
+            question = Question.query.get_or_404(response.question_id)
+            template = FeedbackTemplate.query.get_or_404(question.template_id)
+            
+            if not response.chat_history:
+                return jsonify({'success': False, 'error': 'No chat history available'}), 400
+            
+            chat_history = json.loads(response.chat_history)
+            
+            # Use edited prompt if provided, otherwise use custom prompt
+            if edited_prompt:
+                new_summary = generate_feedback_summary_with_edited_prompt(
+                    question.question_text, 
+                    chat_history,
+                    edited_prompt
+                )
+            else:
+                # Fallback to custom prompt approach
+                new_summary = generate_feedback_summary_with_custom_prompt(
+                    question.question_text, 
+                    chat_history,
+                    template.is_supervisor_feedback,
+                    custom_prompt
+                )
+            
+            # Update the response
+            response.discussion_summary = new_summary
+            db.session.commit()
+            
+            return jsonify({
+                'success': True,
+                'new_summary': new_summary
+            })
+            
+        except Exception as e:
+            print(f"Error regenerating summary: {e}")
+            return jsonify({'success': False, 'error': 'Failed to regenerate summary'}), 500
+
+    @app.route('/api/get-prompt/<response_id>', methods=['GET'])
+    @login_required
+    def get_current_prompt(response_id):
+        user = ensure_authenticated()
+        if not user:
+            return jsonify({'success': False, 'error': 'Authentication required'}), 401
+            
+        response = Response.query.get_or_404(response_id)
+        feedback_request = FeedbackRequest.query.get_or_404(response.feedback_request_id)
+        
+        # Check if user can access this request
+        if not can_access_request(feedback_request, user):
+            return jsonify({'success': False, 'error': 'Permission denied'}), 403
+        
+        try:
+            # Get the question and template for context
+            question = Question.query.get_or_404(response.question_id)
+            template = FeedbackTemplate.query.get_or_404(question.template_id)
+            
+            # Build supervisor-specific guidance for organization
+            supervisor_guidance = ""
+            if template.is_supervisor_feedback:
+                supervisor_guidance = """
+
+IMPORTANT: This feedback is about a supervisor/manager. When organizing:
+- Focus on leadership and management behaviors
+- Emphasize examples of team support, communication, and decision-making
+- Balance constructive feedback with positive observations
+- Highlight specific impacts on team dynamics or professional development
+- Use professional language appropriate for management feedback"""
+            
+            # Reconstruct the prompt that was used
+            current_prompt = f"""You are an expert at organizing and cleaning up feedback into professional, comprehensive statements. 
+
+Your task is to organize and clean up what the feedback giver said while preserving ALL their content and meaning.
+
+Guidelines:
+- Focus ONLY on the user's actual responses and preserve ALL their examples and details
+- Do NOT include or reference the interviewer's questions or prompts
+- Clean up grammar, flow, and organization but preserve ALL substantive content
+- Include ALL specific details, examples, and stories the user mentioned
+- Organize the content logically but keep it comprehensive and detailed
+- Write in third person as feedback about the person being reviewed
+- This should be MORE verbose than the original, not less - organize and expand rather than summarize
+- Aim for 3-6 sentences or more to capture all nuance and detail
+- Base the organized feedback strictly on what the user said, including all their examples{supervisor_guidance}"""
+            
+            return jsonify({
+                'success': True,
+                'prompt': current_prompt
+            })
+            
+        except Exception as e:
+            print(f"Error getting current prompt: {e}")
+            return jsonify({'success': False, 'error': 'Failed to load current prompt'}), 500
 
 # Create the app instance
 app = create_app()

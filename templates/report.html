@@ -60,7 +60,58 @@
                         {% else %}
                             <div class="discussion-response">
                                 {% if response.discussion_summary %}
-                                    <p class="mb-0">{{ response.discussion_summary }}</p>
+                                    <div class="organized-feedback mb-3">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1 me-3">
+                                                <div class="mb-0" id="summary-{{ response.id }}" data-markdown-content="{{ response.discussion_summary | escape }}"></div>
+                                            </div>
+                                            <div class="btn-group-vertical btn-group-sm">
+                                                <button class="btn btn-outline-primary btn-sm" 
+                                                        onclick="showRegenerateModal('{{ response.id }}', '{{ response.question.question_text | escape }}')">
+                                                    <i class="fas fa-sync-alt me-1"></i>Regenerate
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if response.chat_history %}
+                                    <div class="chat-transcript">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <small class="text-muted">
+                                                <i class="fas fa-comments me-1"></i>Full conversation transcript
+                                            </small>
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" 
+                                                    data-bs-toggle="collapse" 
+                                                    data-bs-target="#chat-{{ response.id }}" 
+                                                    aria-expanded="false">
+                                                <i class="fas fa-chevron-down me-1"></i>Show Details
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="collapse" id="chat-{{ response.id }}">
+                                            <div class="card bg-light">
+                                                <div class="card-body">
+                                                    <div class="chat-messages" style="max-height: 300px; overflow-y: auto;">
+                                                        {% set chat_data = response.chat_history | from_json %}
+                                                        {% for message in chat_data %}
+                                                        <div class="message mb-2 {% if message.role == 'user' %}text-end{% endif %}">
+                                                            {% if message.role == 'user' %}
+                                                            <div class="bg-primary text-white p-2 rounded d-inline-block">
+                                                                <strong>Respondent:</strong> {{ message.content }}
+                                                            </div>
+                                                            {% else %}
+                                                            <div class="bg-light text-dark p-2 rounded d-inline-block border">
+                                                                <strong>Assistant:</strong> {{ message.content }}
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
                                 {% else %}
                                     <p class="text-muted mb-0">No response provided</p>
                                 {% endif %}
@@ -69,9 +120,55 @@
                     </div>
                     {% endfor %}
 
+                    <!-- Inline modal for regenerating summary -->
+                    <div id="regenerate-section" class="border rounded p-4 mb-4" style="display: none; background-color: #f8f9fa;">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0">
+                                <i class="fas fa-sync-alt me-2 text-primary"></i>Regenerate Summary
+                            </h6>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="hideRegenerateSection()">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </button>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Question:</label>
+                            <p id="modal-question-text" class="text-muted mb-0"></p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Current Summary:</label>
+                            <div id="current-summary" class="p-2 bg-white border rounded text-muted" style="min-height: 60px;"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="edit-prompt" class="form-label fw-bold">
+                                Edit Summarization Instructions:
+                                <small class="text-muted fw-normal">(modify how you want the summary organized)</small>
+                            </label>
+                            <textarea id="edit-prompt" class="form-control" rows="8" 
+                                      placeholder="Loading current prompt..."></textarea>
+                            <div class="form-text">
+                                Edit these instructions to change how your feedback is organized and presented.
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary" onclick="hideRegenerateSection()">
+                                Cancel
+                            </button>
+                            <button type="button" class="btn btn-primary" id="confirm-regenerate">
+                                <i class="fas fa-sync-alt me-1"></i>Regenerate Summary
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="text-center mt-4">
                         <button class="btn btn-outline-primary" onclick="window.print()">
                             <i class="fas fa-print me-2"></i>Print Report
+                        </button>
+                        <button class="btn btn-outline-secondary ms-2" onclick="toggleAllTranscripts()">
+                            <i class="fas fa-expand me-2"></i>Show All Transcripts
                         </button>
                     </div>
                 {% else %}
@@ -88,4 +185,194 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let allTranscriptsVisible = false;
+let currentResponseId = null;
+
+// Function to render markdown content
+function renderMarkdownContent() {
+    document.querySelectorAll('[data-markdown-content]').forEach(element => {
+        const markdownContent = element.getAttribute('data-markdown-content');
+        if (markdownContent) {
+            element.innerHTML = marked.parse(markdownContent);
+        }
+    });
+}
+
+// Function to update summary with markdown rendering
+function updateSummaryWithMarkdown(elementId, content) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.setAttribute('data-markdown-content', content);
+        element.innerHTML = marked.parse(content);
+    }
+}
+
+function toggleAllTranscripts() {
+    const button = event.target.closest('button');
+    const icon = button.querySelector('i');
+    const collapseElements = document.querySelectorAll('.chat-transcript .collapse');
+    
+    if (!allTranscriptsVisible) {
+        // Show all transcripts
+        collapseElements.forEach(collapse => {
+            new bootstrap.Collapse(collapse, { show: true });
+        });
+        button.innerHTML = '<i class="fas fa-compress me-2"></i>Hide All Transcripts';
+        allTranscriptsVisible = true;
+    } else {
+        // Hide all transcripts
+        collapseElements.forEach(collapse => {
+            new bootstrap.Collapse(collapse, { hide: true });
+        });
+        button.innerHTML = '<i class="fas fa-expand me-2"></i>Show All Transcripts';
+        allTranscriptsVisible = false;
+    }
+}
+
+function showRegenerateModal(responseId, questionText) {
+    currentResponseId = responseId;
+    document.getElementById('modal-question-text').textContent = questionText;
+    
+    // Show the inline regenerate section
+    const regenerateSection = document.getElementById('regenerate-section');
+    regenerateSection.style.display = 'block';
+    
+    // Scroll to the regenerate section
+    regenerateSection.scrollIntoView({ behavior: 'smooth' });
+    
+    // Load current summary with markdown content
+    const currentSummary = document.getElementById(`summary-${responseId}`).getAttribute('data-markdown-content') || 
+                          document.getElementById(`summary-${responseId}`).textContent;
+    document.getElementById('current-summary').innerHTML = marked.parse(currentSummary);
+    
+    // Load the current prompt used for this response
+    loadCurrentPrompt(responseId);
+}
+
+function hideRegenerateSection() {
+    document.getElementById('regenerate-section').style.display = 'none';
+    currentResponseId = null;
+}
+
+function loadCurrentPrompt(responseId) {
+    const promptTextarea = document.getElementById('edit-prompt');
+    promptTextarea.value = 'Loading current prompt...';
+    promptTextarea.disabled = true;
+    
+    fetch(`/api/get-prompt/${responseId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                promptTextarea.value = data.prompt;
+                promptTextarea.disabled = false;
+            } else {
+                promptTextarea.value = 'Error loading prompt. Please try again.';
+                promptTextarea.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading prompt:', error);
+            promptTextarea.value = 'Error loading prompt. Please try again.';
+            promptTextarea.disabled = false;
+        });
+}
+
+function regenerateSummary() {
+    if (!currentResponseId) return;
+    
+    const editedPrompt = document.getElementById('edit-prompt').value.trim();
+    if (!editedPrompt) {
+        alert('Please provide instructions for how to organize the summary.');
+        return;
+    }
+    
+    const button = document.getElementById('confirm-regenerate');
+    const originalText = button.innerHTML;
+    
+    // Show loading state
+    button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Regenerating...';
+    button.disabled = true;
+    
+    // Make API call to regenerate summary with edited prompt
+    fetch(`/api/regenerate-summary/${currentResponseId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            edited_prompt: editedPrompt
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update the summary in the DOM with markdown rendering
+            updateSummaryWithMarkdown(`summary-${currentResponseId}`, data.new_summary);
+            
+            // Update current summary display with markdown rendering
+            document.getElementById('current-summary').innerHTML = marked.parse(data.new_summary);
+            
+            // Hide the regenerate section
+            hideRegenerateSection();
+            
+            // Show success message
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success alert-dismissible fade show position-fixed';
+            alert.style.top = '20px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '9999';
+            alert.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>Summary regenerated successfully!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alert);
+            
+            // Auto-remove alert after 3 seconds
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+            }, 3000);
+        } else {
+            alert('Error regenerating summary: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error regenerating summary. Please try again.');
+    })
+    .finally(() => {
+        // Reset button state
+        button.innerHTML = originalText;
+        button.disabled = false;
+    });
+}
+
+// Update individual toggle buttons when collapsed/expanded
+document.addEventListener('DOMContentLoaded', function() {
+    // Render all markdown content on page load
+    renderMarkdownContent();
+    
+    const collapseElements = document.querySelectorAll('.chat-transcript .collapse');
+    
+    collapseElements.forEach(collapse => {
+        collapse.addEventListener('show.bs.collapse', function() {
+            const button = this.previousElementSibling.querySelector('button');
+            button.innerHTML = '<i class="fas fa-chevron-up me-1"></i>Hide Details';
+        });
+        
+        collapse.addEventListener('hide.bs.collapse', function() {
+            const button = this.previousElementSibling.querySelector('button');
+            button.innerHTML = '<i class="fas fa-chevron-down me-1"></i>Show Details';
+        });
+    });
+    
+    // Add event listener for regenerate button
+    document.getElementById('confirm-regenerate').addEventListener('click', regenerateSummary);
+});
+</script>
 {% endblock %}

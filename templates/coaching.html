@@ -46,37 +46,7 @@
                 <!-- Main Coaching Content -->
                 <div class="coaching-content">
                     {% if coaching_content %}
-                        <div id="coaching-markdown">{{ coaching_content }}</div>
-                        <script>
-                            // Simple markdown-like processing for the coaching content
-                            document.addEventListener('DOMContentLoaded', function() {
-                                const content = document.getElementById('coaching-markdown');
-                                let html = content.textContent;
-                                
-                                // Process headers
-                                html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
-                                html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
-                                html = html.replace(/^\*\*(.*?)\*\*/gm, '<h3>$1</h3>');
-                                
-                                // Process bold text
-                                html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                                
-                                // Process bullet points
-                                html = html.replace(/^- (.*$)/gm, '<li>$1</li>');
-                                html = html.replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>');
-                                
-                                // Process line breaks
-                                html = html.replace(/\n\n/g, '</p><p>');
-                                html = html.replace(/\n/g, '<br>');
-                                html = '<p>' + html + '</p>';
-                                
-                                // Clean up empty paragraphs
-                                html = html.replace(/<p><\/p>/g, '');
-                                html = html.replace(/<p><br>/g, '<p>');
-                                
-                                content.innerHTML = html;
-                            });
-                        </script>
+                        <div id="coaching-markdown" data-markdown-content="{{ coaching_content | escape }}"></div>
                     {% else %}
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
@@ -98,6 +68,21 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Render markdown content for coaching guide
+    const coachingElement = document.getElementById('coaching-markdown');
+    if (coachingElement) {
+        const markdownContent = coachingElement.getAttribute('data-markdown-content');
+        if (markdownContent) {
+            coachingElement.innerHTML = marked.parse(markdownContent);
+        }
+    }
+});
+</script>
 {% endblock %}
 
 {% block styles %}
