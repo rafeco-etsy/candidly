@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}Aggregate Feedback Report - Candidly{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2><i class="fas fa-chart-bar me-2"></i>Aggregate Feedback Report</h2>
+        <p class="text-muted">View all feedback for a person across multiple requests and date ranges</p>
+    </div>
+</div>
+
+<!-- Filter Form -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Filter Feedback</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('aggregate_report') }}">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="target_email" class="form-label">Person</label>
+                            <select class="form-select" id="target_email" name="target_email" required>
+                                <option value="">Select a person...</option>
+                                {% for target in available_targets %}
+                                <option value="{{ target.target_email }}" 
+                                        {% if target.target_email == target_email %}selected{% endif %}>
+                                    {{ target.target_name }} ({{ target.target_email }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" 
+                                   value="{{ start_date }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" 
+                                   value="{{ end_date }}">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-2"></i>View Report
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if feedback_data %}
+<!-- Report Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-user me-2"></i>Feedback Summary
+                    {% if target_email %}
+                    {% for target in available_targets %}
+                        {% if target.target_email == target_email %}
+                        for {{ target.target_name }}
+                        {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                </h5>
+                {% if start_date or end_date %}
+                <small>
+                    {% if start_date and end_date %}
+                    From {{ start_date }} to {{ end_date }}
+                    {% elif start_date %}
+                    From {{ start_date }} onwards
+                    {% elif end_date %}
+                    Up to {{ end_date }}
+                    {% endif %}
+                </small>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h3 class="text-primary">{{ feedback_data|length }}</h3>
+                            <p class="text-muted mb-0">Feedback Sessions</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h3 class="text-success">{{ feedback_data|sum(attribute='response_count') }}</h3>
+                            <p class="text-muted mb-0">Total Responses</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <h3 class="text-info">
+                                {% set unique_givers = [] %}
+                                {% for data in feedback_data %}
+                                    {% if data.request.assigned_to_email not in unique_givers %}
+                                        {% set _ = unique_givers.append(data.request.assigned_to_email) %}
+                                    {% endif %}
+                                {% endfor %}
+                                {{ unique_givers|length }}
+                            </h3>
+                            <p class="text-muted mb-0">Unique Feedback Givers</p>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if feedback_data|length > 1 %}
+                <div class="row mt-3">
+                    <div class="col-12 text-center">
+                        <button class="btn btn-outline-primary" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Print Report
+                        </button>
+                        <button class="btn btn-outline-success ms-2" onclick="exportReport()">
+                            <i class="fas fa-download me-2"></i>Export Summary
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Details -->
+{% for data in feedback_data %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0">
+                        <i class="fas fa-calendar me-2"></i>{{ data.request.created_at.strftime('%B %d, %Y') }}
+                        <span class="badge bg-primary ms-2">{{ data.request.template.name }}</span>
+                        {% if data.request.template.is_supervisor_feedback %}
+                        <span class="badge bg-warning text-dark ms-1">Supervisor</span>
+                        {% endif %}
+                    </h6>
+                    <small class="text-muted">
+                        Feedback from {{ data.request.assigned_to_email }} • 
+                        Requested by {{ data.request.creator.name }}
+                    </small>
+                </div>
+                <div>
+                    <a href="{{ url_for('view_report', request_id=data.request.id) }}" 
+                       class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-external-link-alt me-1"></i>View Full Report
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% for response in data.responses %}
+                <div class="mb-3 {% if not loop.last %}border-bottom pb-3{% endif %}">
+                    <h6 class="text-primary">{{ response.question.question_text }}</h6>
+                    {% if response.question.question_type == 'rating' and response.rating_value %}
+                        <div class="mb-2">
+                            <span class="badge bg-info">Rating: {{ response.rating_value }}/5</span>
+                        </div>
+                    {% elif response.question.question_type == 'agreement' and response.agreement_value %}
+                        <div class="mb-2">
+                            {% set agreement_labels = {
+                                'strongly_agree': 'Strongly Agree',
+                                'agree': 'Agree', 
+                                'disagree': 'Disagree',
+                                'strongly_disagree': 'Strongly Disagree',
+                                'na': 'N/A'
+                            } %}
+                            <span class="badge bg-info">{{ agreement_labels.get(response.agreement_value, response.agreement_value) }}</span>
+                        </div>
+                    {% endif %}
+                    
+                    {% if response.discussion_summary %}
+                    <div class="bg-light p-3 rounded">
+                        <div class="rendered-markdown">{{ response.discussion_summary }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% elif target_email %}
+<!-- No Data State -->
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No feedback found</h5>
+                <p class="text-muted">
+                    No completed feedback found for the selected person and date range.
+                    {% if start_date or end_date %}
+                    Try adjusting the date filters.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Instructions -->
+{% if not target_email %}
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Generate Aggregate Report</h5>
+                <p class="text-muted mb-4">
+                    Select a person above to view all their feedback across multiple requests and time periods.
+                    Perfect for performance reviews and comprehensive feedback compilation.
+                </p>
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-user-tie fa-2x mb-2"></i>
+                                        <h6>Manager View</h6>
+                                        <small>Compile feedback for performance reviews</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <i class="fas fa-user fa-2x mb-2"></i>
+                                        <h6>Self-Service</h6>
+                                        <small>View your own feedback history</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+// Render markdown content
+document.addEventListener('DOMContentLoaded', function() {
+    const markdownElements = document.querySelectorAll('.rendered-markdown');
+    markdownElements.forEach(element => {
+        if (typeof marked !== 'undefined') {
+            element.innerHTML = marked.parse(element.textContent);
+        }
+    });
+});
+
+// Export functionality
+function exportReport() {
+    const targetEmail = '{{ target_email }}';
+    const startDate = '{{ start_date }}';
+    const endDate = '{{ end_date }}';
+    
+    let content = 'Aggregate Feedback Report\n';
+    content += '========================\n\n';
+    
+    {% if target_email %}
+    content += 'Person: {{ target_email }}\n';
+    {% if start_date or end_date %}
+    content += 'Date Range: ';
+    {% if start_date and end_date %}
+    content += '{{ start_date }} to {{ end_date }}\n';
+    {% elif start_date %}
+    content += 'From {{ start_date }}\n';
+    {% elif end_date %}
+    content += 'Up to {{ end_date }}\n';
+    {% endif %}
+    {% endif %}
+    content += '\n';
+    
+    {% for data in feedback_data %}
+    content += '{{ data.request.created_at.strftime('%B %d, %Y') }} - {{ data.request.template.name }}\n';
+    content += 'Feedback from: {{ data.request.assigned_to_email }}\n';
+    content += 'Requested by: {{ data.request.creator.name }}\n';
+    content += '-'.repeat(50) + '\n';
+    
+    {% for response in data.responses %}
+    content += '\nQ: {{ response.question.question_text }}\n';
+    {% if response.rating_value %}
+    content += 'Rating: {{ response.rating_value }}/5\n';
+    {% endif %}
+    {% if response.agreement_value %}
+    content += 'Response: {{ response.agreement_value }}\n';
+    {% endif %}
+    {% if response.discussion_summary %}
+    content += 'A: {{ response.discussion_summary }}\n';
+    {% endif %}
+    {% endfor %}
+    
+    content += '\n' + '='.repeat(60) + '\n\n';
+    {% endfor %}
+    {% endif %}
+    
+    // Create and download file
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `feedback-report-${targetEmail || 'summary'}-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

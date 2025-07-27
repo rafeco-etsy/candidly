@@ -15,15 +15,33 @@
                 {% if templates %}
                     <form method="POST">
                         <div class="mb-4">
-                            <label for="target_name" class="form-label">Person being reviewed</label>
-                            <input type="text" class="form-control" id="target_name" name="target_name" required>
-                            <div class="form-text">Enter the name of the person who will receive this feedback.</div>
+                            <label for="target_email" class="form-label">Email of person being reviewed</label>
+                            <div class="position-relative">
+                                <input type="email" class="form-control" id="target_email" name="target_email" required 
+                                       autocomplete="off" data-lpignore="true" data-form-type="" 
+                                       data-1p-ignore="true" data-bwignore="true">
+                                <div id="target_email_suggestions" class="dropdown-menu position-absolute w-100" style="max-height: 200px; overflow-y: auto; z-index: 1000;"></div>
+                            </div>
+                            <div class="form-text">Email address of the person who will receive this feedback.</div>
                         </div>
 
                         <div class="mb-4">
-                            <label for="target_email" class="form-label">Email (optional)</label>
-                            <input type="email" class="form-control" id="target_email" name="target_email">
-                            <div class="form-text">Email address of the person being reviewed (for future notification features).</div>
+                            <label for="target_name" class="form-label">Name of person being reviewed</label>
+                            <input type="text" class="form-control" id="target_name" name="target_name" required
+                                   autocomplete="off" data-lpignore="true" data-form-type=""
+                                   data-1p-ignore="true" data-bwignore="true">
+                            <div class="form-text">Display name for the person being reviewed.</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="assigned_to_email" class="form-label">Email of person giving feedback</label>
+                            <div class="position-relative">
+                                <input type="email" class="form-control" id="assigned_to_email" name="assigned_to_email" required 
+                                       autocomplete="off" data-lpignore="true" data-form-type=""
+                                       data-1p-ignore="true" data-bwignore="true">
+                                <div id="assigned_to_email_suggestions" class="dropdown-menu position-absolute w-100" style="max-height: 200px; overflow-y: auto; z-index: 1000;"></div>
+                            </div>
+                            <div class="form-text">Email address of the person who should complete this feedback request.</div>
                         </div>
 
                         <div class="mb-4">
@@ -35,25 +53,6 @@
                             </div>
                         </div>
 
-                        {% if users|length > 1 %}
-                        <div class="mb-4">
-                            <label for="assigned_to_id" class="form-label">Assign to</label>
-                            <select class="form-select" id="assigned_to_id" name="assigned_to_id">
-                                {% for user in users %}
-                                <option value="{{ user.id }}" {% if user.id == current_user.id %}selected{% endif %}>
-                                    {{ user.name }} ({{ user.email }})
-                                    {% if user.id == current_user.id %} - You{% endif %}
-                                </option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">
-                                Choose who should complete this feedback request. 
-                                {% if not current_user.can_create_requests_for_others %}
-                                You can only assign feedback requests to yourself.
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endif %}
 
                         <div class="mb-4">
                             <label for="reviewer_id" class="form-label">Reviewer (optional)</label>
@@ -109,4 +108,137 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Email autocomplete functionality
+    function setupEmailAutocomplete(inputId, suggestionsId) {
+        const input = document.getElementById(inputId);
+        const suggestions = document.getElementById(suggestionsId);
+        let currentFocus = -1;
+        let debounceTimer;
+        
+        input.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            // Clear previous timer
+            clearTimeout(debounceTimer);
+            
+            if (query.length < 2) {
+                suggestions.style.display = 'none';
+                suggestions.innerHTML = '';
+                return;
+            }
+            
+            // Debounce API calls
+            debounceTimer = setTimeout(() => {
+                fetch(`/api/email-suggestions?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestions.innerHTML = '';
+                        currentFocus = -1;
+                        
+                        if (data.length === 0) {
+                            suggestions.style.display = 'none';
+                            return;
+                        }
+                        
+                        data.forEach((item, index) => {
+                            const option = document.createElement('div');
+                            option.className = 'dropdown-item d-flex justify-content-between align-items-center';
+                            option.style.cursor = 'pointer';
+                            
+                            const emailInfo = document.createElement('div');
+                            emailInfo.innerHTML = `
+                                <div class="fw-medium">${item.name}</div>
+                                <small class="text-muted">${item.email}</small>
+                            `;
+                            
+                            const badge = document.createElement('span');
+                            badge.className = `badge bg-${item.type === 'user' ? 'primary' : item.type === 'target' ? 'info' : 'secondary'}`;
+                            badge.textContent = item.type === 'user' ? 'User' : item.type === 'target' ? 'Target' : 'Previous';
+                            
+                            option.appendChild(emailInfo);
+                            option.appendChild(badge);
+                            
+                            option.addEventListener('click', function() {
+                                input.value = item.email;
+                                suggestions.style.display = 'none';
+                                
+                                // Auto-fill name if it's the target email field and name is empty
+                                if (inputId === 'target_email' && item.name && item.name !== item.email) {
+                                    const nameInput = document.getElementById('target_name');
+                                    if (!nameInput.value.trim()) {
+                                        nameInput.value = item.name;
+                                    }
+                                }
+                                
+                                input.focus();
+                            });
+                            
+                            option.addEventListener('mouseenter', function() {
+                                currentFocus = index;
+                                updateFocus();
+                            });
+                            
+                            suggestions.appendChild(option);
+                        });
+                        
+                        suggestions.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching email suggestions:', error);
+                        suggestions.style.display = 'none';
+                    });
+            }, 300);
+        });
+        
+        // Keyboard navigation
+        input.addEventListener('keydown', function(e) {
+            const items = suggestions.querySelectorAll('.dropdown-item');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentFocus = Math.min(currentFocus + 1, items.length - 1);
+                updateFocus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentFocus = Math.max(currentFocus - 1, -1);
+                updateFocus();
+            } else if (e.key === 'Enter' && currentFocus >= 0) {
+                e.preventDefault();
+                if (items[currentFocus]) {
+                    items[currentFocus].click();
+                }
+            } else if (e.key === 'Escape') {
+                suggestions.style.display = 'none';
+                currentFocus = -1;
+            }
+        });
+        
+        function updateFocus() {
+            const items = suggestions.querySelectorAll('.dropdown-item');
+            items.forEach((item, index) => {
+                if (index === currentFocus) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+        
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!input.contains(e.target) && !suggestions.contains(e.target)) {
+                suggestions.style.display = 'none';
+                currentFocus = -1;
+            }
+        });
+    }
+    
+    // Setup autocomplete for both email fields
+    setupEmailAutocomplete('target_email', 'target_email_suggestions');
+    setupEmailAutocomplete('assigned_to_email', 'assigned_to_email_suggestions');
+});
+</script>
 {% endblock %}

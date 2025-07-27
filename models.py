@@ -22,8 +22,12 @@ class User(UserMixin, db.Model):
     # Relationships
     created_templates = db.relationship('FeedbackTemplate', foreign_keys='FeedbackTemplate.created_by_id', backref='creator', lazy=True)
     created_requests = db.relationship('FeedbackRequest', foreign_keys='FeedbackRequest.created_by_id', backref='creator', lazy=True)
-    assigned_requests = db.relationship('FeedbackRequest', foreign_keys='FeedbackRequest.assigned_to_id', backref='assignee', lazy=True)
+    target_requests = db.relationship('FeedbackRequest', foreign_keys='FeedbackRequest.target_user_id', backref='target_user', lazy=True)
+    assigned_requests = db.relationship('FeedbackRequest', foreign_keys='FeedbackRequest.assigned_to_user_id', backref='assigned_user', lazy=True)
     reviewed_requests = db.relationship('FeedbackRequest', foreign_keys='FeedbackRequest.reviewer_id', backref='reviewer', lazy=True)
+    
+    # Legacy relationship - keeping for backwards compatibility
+    legacy_assigned_requests = db.relationship('FeedbackRequest', foreign_keys='FeedbackRequest.assigned_to_id', backref='legacy_assignee', lazy=True)
     
     def __repr__(self):
         return f'<User {self.email}>'
@@ -45,11 +49,18 @@ class FeedbackTemplate(db.Model):
 
 class FeedbackRequest(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    target_name = db.Column(db.String(255), nullable=False)
-    target_email = db.Column(db.String(255), nullable=True)  # Optional email for the feedback target
+    
+    # Email-first approach for target person (who feedback is about)
+    target_email = db.Column(db.String(255), nullable=False)  # Required: who the feedback is about
+    target_name = db.Column(db.String(255), nullable=False)  # Display name for target person
+    target_user_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=True)  # Optional: links to User account if they have one
+    
+    # Email-first approach for assigned person (who should give feedback)  
+    assigned_to_email = db.Column(db.String(255), nullable=False)  # Required: who should complete the feedback
+    assigned_to_user_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=True)  # Optional: links to User account if they have one
+    
     template_id = db.Column(db.String(36), db.ForeignKey('feedback_template.id'), nullable=False)
-    created_by_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
-    assigned_to_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
+    created_by_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)  # Manager/person creating request (must have account)
     reviewer_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=True)  # Optional reviewer before delivery
     context = db.Column(db.Text, nullable=True)  # Additional context for GPT about the relationship/situation
     status = db.Column(db.String(20), default='pending')  # pending, in_progress, completed
@@ -57,6 +68,9 @@ class FeedbackRequest(db.Model):
     completed_at = db.Column(db.DateTime, nullable=True)
     
     responses = db.relationship('Response', backref='feedback_request', lazy=True)
+    
+    # Legacy fields - keeping for backwards compatibility, will be deprecated
+    assigned_to_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=True)  # DEPRECATED: use assigned_to_user_id
 
 class Question(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))

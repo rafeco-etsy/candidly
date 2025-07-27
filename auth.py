@@ -101,8 +101,16 @@ def can_access_request(feedback_request, user=None):
     if feedback_request.created_by_id == user.id:
         return True
     
-    # Assignee can access requests assigned to them
-    if feedback_request.assigned_to_id == user.id:
+    # Target person can access feedback about them (email-first)
+    if feedback_request.target_email == user.email:
+        return True
+    
+    # Assignee can access requests assigned to them (email-first)
+    if feedback_request.assigned_to_email == user.email:
+        return True
+    
+    # Legacy fallback for existing records
+    if hasattr(feedback_request, 'assigned_to_id') and feedback_request.assigned_to_id == user.id:
         return True
     
     return False
@@ -115,8 +123,15 @@ def can_complete_request(feedback_request, user=None):
     if not user.is_authenticated:
         return False
     
-    # Only assignee can complete the request
-    return feedback_request.assigned_to_id == user.id
+    # Only assignee can complete the request (email-first)
+    if feedback_request.assigned_to_email == user.email:
+        return True
+    
+    # Legacy fallback for existing records
+    if hasattr(feedback_request, 'assigned_to_id') and feedback_request.assigned_to_id == user.id:
+        return True
+    
+    return False
 
 def get_users_for_assignment():
     """Get list of users that can be assigned feedback requests."""

@@ -450,30 +450,36 @@ def register_routes(app):
             
         if request.method == 'POST':
             target_name = request.form['target_name']
-            target_email = request.form.get('target_email', '')
+            target_email = request.form['target_email']
+            assigned_to_email = request.form['assigned_to_email']
             context = request.form.get('context', '')
             template_id = request.form['template_id']
-            assigned_to_id = request.form.get('assigned_to_id')
             reviewer_id = request.form.get('reviewer_id') or None
             
-            # If no assignee specified, assign to current user (self-feedback)
-            if not assigned_to_id:
-                assigned_to_id = user.id
-            
-            # Check permissions for assigning to others
-            if assigned_to_id != user.id and not user.can_create_requests_for_others and not user.is_admin:
+            # Check permissions for creating requests
+            # Users can always create requests for themselves as the assignee
+            # Only users with permission can create requests for others
+            if assigned_to_email != user.email and not user.can_create_requests_for_others and not user.is_admin:
                 flash('You do not have permission to create feedback requests for others.', 'error')
                 return redirect(url_for('create_request'))
             
-            # Create feedback request
+            # Find existing users by email to link accounts if they exist
+            target_user = User.query.filter_by(email=target_email).first()
+            assigned_user = User.query.filter_by(email=assigned_to_email).first()
+            
+            # Create feedback request with email-first approach
             feedback_request = FeedbackRequest(
-                target_name=target_name,
                 target_email=target_email,
+                target_name=target_name,
+                target_user_id=target_user.id if target_user else None,
+                assigned_to_email=assigned_to_email,
+                assigned_to_user_id=assigned_user.id if assigned_user else None,
                 context=context,
                 template_id=template_id,
                 created_by_id=user.id,
-                assigned_to_id=assigned_to_id,
-                reviewer_id=reviewer_id
+                reviewer_id=reviewer_id,
+                # Legacy compatibility
+                assigned_to_id=assigned_user.id if assigned_user else None
             )
             db.session.add(feedback_request)
             db.session.commit()
@@ -759,30 +765,192 @@ IMPORTANT: Always respond with just ONE question or acknowledgment. Keep respons
         if not user:
             return redirect(url_for('auth_login'))
         
-        # Get requests created by or assigned to the user
+        # Organize requests by user role (email-first approach)
         if user.is_admin:
             # Admins see all requests
-            feedback_requests = FeedbackRequest.query.order_by(FeedbackRequest.created_at.desc()).all()
+            all_requests = FeedbackRequest.query.order_by(FeedbackRequest.created_at.desc()).all()
+            requests_by_role = {
+                'created_by_me': all_requests,
+                'assigned_to_me': [],
+                'about_me': []
+            }
         else:
-            # Regular users see their created requests and assigned requests
-            feedback_requests = FeedbackRequest.query.filter(
-                (FeedbackRequest.created_by_id == user.id) | 
-                (FeedbackRequest.assigned_to_id == user.id)
+            # Separate requests by the user's role
+            # 1. Requests I created (as manager/HR)
+            created_by_me = FeedbackRequest.query.filter(
+                FeedbackRequest.created_by_id == user.id
             ).order_by(FeedbackRequest.created_at.desc()).all()
+            
+            # 2. Requests assigned to me (feedback I need to give)
+            assigned_to_me = FeedbackRequest.query.filter(
+                (FeedbackRequest.assigned_to_email == user.email) |
+                # Legacy fallback
+                (FeedbackRequest.assigned_to_id == user.id)
+            ).filter(
+                FeedbackRequest.created_by_id != user.id  # Exclude my own requests
+            ).order_by(FeedbackRequest.created_at.desc()).all()
+            
+            # 3. Feedback about me (I'm the target)
+            about_me = FeedbackRequest.query.filter(
+                FeedbackRequest.target_email == user.email
+            ).filter(
+                FeedbackRequest.created_by_id != user.id  # Exclude my own requests
+            ).order_by(FeedbackRequest.created_at.desc()).all()
+            
+            requests_by_role = {
+                'created_by_me': created_by_me,
+                'assigned_to_me': assigned_to_me,
+                'about_me': about_me
+            }
         
-        # Add submission count for each request
-        requests_with_counts = []
-        for request in feedback_requests:
-            submitted_count = Response.query.filter_by(
-                feedback_request_id=request.id, 
-                is_draft=False
-            ).count()
-            requests_with_counts.append({
-                'request': request,
-                'submitted_count': submitted_count
+        # Add submission counts for each role
+        role_data = {}
+        for role, requests in requests_by_role.items():
+            requests_with_counts = []
+            for request in requests:
+                submitted_count = Response.query.filter_by(
+                    feedback_request_id=request.id, 
+                    is_draft=False
+                ).count()
+                requests_with_counts.append({
+                    'request': request,
+                    'submitted_count': submitted_count
+                })
+            role_data[role] = requests_with_counts
+        
+        return render_template('dashboard.html', role_data=role_data, user=user)
+
+    @app.route('/api/email-suggestions')
+    @login_required
+    def email_suggestions():
+        """Provide email suggestions for autocomplete."""
+        query = request.args.get('q', '').lower()
+        
+        if not query or len(query) < 2:
+            return jsonify([])
+        
+        # Get emails from users
+        user_emails = []
+        users = User.query.filter(User.email.ilike(f'%{query}%')).limit(10).all()
+        for user in users:
+            user_emails.append({
+                'email': user.email,
+                'name': user.name,
+                'type': 'user'
             })
         
-        return render_template('dashboard.html', requests_with_counts=requests_with_counts, user=user)
+        # Get emails from feedback requests (targets and assignees)
+        target_emails = db.session.query(FeedbackRequest.target_email, FeedbackRequest.target_name)\
+            .filter(FeedbackRequest.target_email.ilike(f'%{query}%'))\
+            .distinct().limit(5).all()
+        
+        assigned_emails = db.session.query(FeedbackRequest.assigned_to_email)\
+            .filter(FeedbackRequest.assigned_to_email.ilike(f'%{query}%'))\
+            .distinct().limit(5).all()
+        
+        # Add target emails
+        for target_email, target_name in target_emails:
+            if not any(item['email'] == target_email for item in user_emails):
+                user_emails.append({
+                    'email': target_email,
+                    'name': target_name,
+                    'type': 'target'
+                })
+        
+        # Add assigned emails
+        for (assigned_email,) in assigned_emails:
+            if not any(item['email'] == assigned_email for item in user_emails):
+                user_emails.append({
+                    'email': assigned_email,
+                    'name': assigned_email,
+                    'type': 'assignee'
+                })
+        
+        # Sort by relevance (exact match first, then starts with, then contains)
+        def sort_key(item):
+            email = item['email'].lower()
+            if email == query:
+                return (0, email)
+            elif email.startswith(query):
+                return (1, email)
+            else:
+                return (2, email)
+        
+        user_emails.sort(key=sort_key)
+        return jsonify(user_emails[:10])
+
+    @app.route('/aggregate-report')
+    @login_required
+    def aggregate_report():
+        """View aggregate feedback reports for a person across multiple requests."""
+        user = ensure_authenticated()
+        if not user:
+            return redirect(url_for('auth_login'))
+        
+        target_email = request.args.get('target_email', '')
+        start_date = request.args.get('start_date', '')
+        end_date = request.args.get('end_date', '')
+        
+        # Get available target people (those who have received feedback)
+        if user.is_admin:
+            # Admins can see aggregates for anyone
+            available_targets = db.session.query(FeedbackRequest.target_email, FeedbackRequest.target_name)\
+                .distinct().order_by(FeedbackRequest.target_name).all()
+        else:
+            # Regular users can see:
+            # 1. People they created requests for (as manager)
+            # 2. Themselves (as target)
+            available_targets = db.session.query(FeedbackRequest.target_email, FeedbackRequest.target_name)\
+                .filter(
+                    (FeedbackRequest.created_by_id == user.id) |
+                    (FeedbackRequest.target_email == user.email)
+                ).distinct().order_by(FeedbackRequest.target_name).all()
+        
+        feedback_data = []
+        if target_email:
+            # Build date filter
+            date_filter = []
+            if start_date:
+                try:
+                    start_dt = datetime.strptime(start_date, '%Y-%m-%d')
+                    date_filter.append(FeedbackRequest.created_at >= start_dt)
+                except ValueError:
+                    pass
+            if end_date:
+                try:
+                    end_dt = datetime.strptime(end_date, '%Y-%m-%d')
+                    date_filter.append(FeedbackRequest.created_at <= end_dt)
+                except ValueError:
+                    pass
+            
+            # Get all feedback requests for this target email
+            query = FeedbackRequest.query.filter(FeedbackRequest.target_email == target_email)
+            if date_filter:
+                query = query.filter(*date_filter)
+            
+            feedback_requests = query.order_by(FeedbackRequest.created_at.desc()).all()
+            
+            # Get responses for each request
+            for req in feedback_requests:
+                responses = Response.query.filter_by(
+                    feedback_request_id=req.id, 
+                    is_draft=False
+                ).all()
+                
+                if responses:  # Only include requests with actual responses
+                    feedback_data.append({
+                        'request': req,
+                        'responses': responses,
+                        'response_count': len(responses)
+                    })
+        
+        return render_template('aggregate_report.html', 
+                             target_email=target_email,
+                             start_date=start_date,
+                             end_date=end_date,
+                             available_targets=available_targets,
+                             feedback_data=feedback_data,
+                             user=user)
 
     @app.route('/report/<request_id>')
     @login_required
