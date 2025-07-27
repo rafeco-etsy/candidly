@@ -26,6 +26,15 @@
                             <div class="form-text">Email address of the person being reviewed (for future notification features).</div>
                         </div>
 
+                        <div class="mb-4">
+                            <label for="context" class="form-label">Relationship Context (optional)</label>
+                            <textarea class="form-control" id="context" name="context" rows="3" 
+                                      placeholder="e.g., This person recently started reporting to [target name], [target name] was just promoted to team lead, This person is a product manager giving feedback about an engineer on their team..."></textarea>
+                            <div class="form-text">
+                                Describe the relationship between the feedback giver and the person being reviewed. This helps the AI ask more relevant follow-up questions and provide better coaching guidance.
+                            </div>
+                        </div>
+
                         {% if users|length > 1 %}
                         <div class="mb-4">
                             <label for="assigned_to_id" class="form-label">Assign to</label>
@@ -45,6 +54,22 @@
                             </div>
                         </div>
                         {% endif %}
+
+                        <div class="mb-4">
+                            <label for="reviewer_id" class="form-label">Reviewer (optional)</label>
+                            <select class="form-select" id="reviewer_id" name="reviewer_id">
+                                <option value="">No reviewer - deliver feedback directly</option>
+                                {% for user in users %}
+                                <option value="{{ user.id }}">
+                                    {{ user.name }} ({{ user.email }})
+                                    {% if user.id == current_user.id %} - You{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                Optionally assign a reviewer to approve the feedback before it's delivered to the target person.
+                            </div>
+                        </div>
 
                         <div class="mb-4">
                             <label for="template_id" class="form-label">Feedback Template</label>

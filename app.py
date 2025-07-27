@@ -37,6 +37,7 @@ def generate_personalized_coaching(feedback_request, responses, safety_analysis)
         relationship_type = "supervisor" if feedback_request.template.is_supervisor_feedback else "peer/colleague"
         target_name = feedback_request.target_name
         safety_level = safety_analysis['safety_level']
+        context = feedback_request.context if feedback_request.context and feedback_request.context.strip() else ""
         
         # Build comprehensive coaching prompt
         response = client.chat.completions.create(
@@ -65,6 +66,8 @@ Write in second person ("you should...") as direct coaching advice. Be specific 
                 {
                     "role": "user",
                     "content": f"""I need coaching on delivering feedback to {target_name}, who is my {relationship_type}. 
+
+{f"Additional context about our relationship: {context}" if context else ""}
 
 Here's the feedback I wrote:
 
@@ -448,8 +451,10 @@ def register_routes(app):
         if request.method == 'POST':
             target_name = request.form['target_name']
             target_email = request.form.get('target_email', '')
+            context = request.form.get('context', '')
             template_id = request.form['template_id']
             assigned_to_id = request.form.get('assigned_to_id')
+            reviewer_id = request.form.get('reviewer_id') or None
             
             # If no assignee specified, assign to current user (self-feedback)
             if not assigned_to_id:
@@ -464,9 +469,11 @@ def register_routes(app):
             feedback_request = FeedbackRequest(
                 target_name=target_name,
                 target_email=target_email,
+                context=context,
                 template_id=template_id,
                 created_by_id=user.id,
-                assigned_to_id=assigned_to_id
+                assigned_to_id=assigned_to_id,
+                reviewer_id=reviewer_id
             )
             db.session.add(feedback_request)
             db.session.commit()
@@ -511,6 +518,9 @@ def register_routes(app):
         # Get the original question and template to provide context
         question = Question.query.get_or_404(question_id)
         template = FeedbackTemplate.query.get_or_404(question.template_id)
+        
+        # Get feedback request for context
+        feedback_request = FeedbackRequest.query.get_or_404(feedback_request_id) if feedback_request_id else None
         
         try:
             # Initialize OpenAI client
@@ -558,6 +568,15 @@ IMPORTANT: This feedback is about someone's supervisor. Keep in mind:
 - Be particularly thoughtful about constructive criticism (balance with positive aspects)
 - Consider questions about professional development support, delegation, and team dynamics"""
 
+            # Build relationship context guidance
+            relationship_context = ""
+            if feedback_request and feedback_request.context and feedback_request.context.strip():
+                relationship_context = f"""
+
+RELATIONSHIP CONTEXT: {feedback_request.context.strip()}
+
+This describes the relationship between the feedback giver and {feedback_request.target_name}. Use this context to ask more relevant and specific follow-up questions. Tailor your questions based on this relationship dynamic and situation."""
+
             # Build conversation history for the LLM
             messages = [
                 {
@@ -571,9 +590,9 @@ Guidelines:
 - Keep your responses brief, conversational and supportive
 - When they've provided sufficient detail (usually after 2-3 exchanges), acknowledge their response and ask if there's anything else they'd like to add
 - If they indicate they're done (saying things like "done", "nothing else", "that's all"), respond with "Thank you for that detailed feedback!" to signal completion
-- Reference previous answers when relevant to create a cohesive feedback experience{supervisor_guidance}
+- Reference previous answers when relevant to create a cohesive feedback experience
 
-IMPORTANT: Always respond with just ONE question or acknowledgment. Keep responses concise and focused.{context_info}"""
+IMPORTANT: Always respond with just ONE question or acknowledgment. Keep responses concise and focused.{supervisor_guidance}{relationship_context}{context_info}"""
                 }
             ]
             

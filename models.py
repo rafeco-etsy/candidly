@@ -23,6 +23,7 @@ class User(UserMixin, db.Model):
     created_templates = db.relationship('FeedbackTemplate', foreign_keys='FeedbackTemplate.created_by_id', backref='creator', lazy=True)
     created_requests = db.relationship('FeedbackRequest', foreign_keys='FeedbackRequest.created_by_id', backref='creator', lazy=True)
     assigned_requests = db.relationship('FeedbackRequest', foreign_keys='FeedbackRequest.assigned_to_id', backref='assignee', lazy=True)
+    reviewed_requests = db.relationship('FeedbackRequest', foreign_keys='FeedbackRequest.reviewer_id', backref='reviewer', lazy=True)
     
     def __repr__(self):
         return f'<User {self.email}>'
@@ -49,6 +50,8 @@ class FeedbackRequest(db.Model):
     template_id = db.Column(db.String(36), db.ForeignKey('feedback_template.id'), nullable=False)
     created_by_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
     assigned_to_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
+    reviewer_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=True)  # Optional reviewer before delivery
+    context = db.Column(db.Text, nullable=True)  # Additional context for GPT about the relationship/situation
     status = db.Column(db.String(20), default='pending')  # pending, in_progress, completed
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     completed_at = db.Column(db.DateTime, nullable=True)
