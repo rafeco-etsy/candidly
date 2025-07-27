@@ -1,8 +1,34 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 from datetime import datetime
 import uuid
 
 db = SQLAlchemy()
+
+class User(UserMixin, db.Model):
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    email = db.Column(db.String(255), unique=True, nullable=False)
+    name = db.Column(db.String(255), nullable=False)
+    google_id = db.Column(db.String(255), unique=True, nullable=True)  # For Google OAuth
+    
+    # Permissions
+    can_create_templates = db.Column(db.Boolean, default=False)
+    can_create_requests_for_others = db.Column(db.Boolean, default=False)
+    is_admin = db.Column(db.Boolean, default=False)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_login = db.Column(db.DateTime, nullable=True)
+    
+    # Relationships
+    created_templates = db.relationship('FeedbackTemplate', foreign_keys='FeedbackTemplate.created_by_id', backref='creator', lazy=True)
+    created_requests = db.relationship('FeedbackRequest', foreign_keys='FeedbackRequest.created_by_id', backref='creator', lazy=True)
+    assigned_requests = db.relationship('FeedbackRequest', foreign_keys='FeedbackRequest.assigned_to_id', backref='assignee', lazy=True)
+    
+    def __repr__(self):
+        return f'<User {self.email}>'
+    
+    def get_id(self):
+        return str(self.id)
 
 class FeedbackTemplate(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -10,6 +36,7 @@ class FeedbackTemplate(db.Model):
     description = db.Column(db.Text, nullable=True)
     intro_text = db.Column(db.Text, nullable=True)
     is_supervisor_feedback = db.Column(db.Boolean, default=False, nullable=False)
+    created_by_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     questions = db.relationship('Question', backref='template', lazy=True)
@@ -18,8 +45,13 @@ class FeedbackTemplate(db.Model):
 class FeedbackRequest(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     target_name = db.Column(db.String(255), nullable=False)
+    target_email = db.Column(db.String(255), nullable=True)  # Optional email for the feedback target
     template_id = db.Column(db.String(36), db.ForeignKey('feedback_template.id'), nullable=False)
+    created_by_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
+    assigned_to_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
+    status = db.Column(db.String(20), default='pending')  # pending, in_progress, completed
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    completed_at = db.Column(db.DateTime, nullable=True)
     
     responses = db.relationship('Response', backref='feedback_request', lazy=True)
 

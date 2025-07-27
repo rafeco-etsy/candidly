@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_migrate import Migrate
+from flask_login import login_required, current_user, login_user, logout_user
 from config import Config
-from models import db, FeedbackTemplate, FeedbackRequest, Question, Response
+from models import db, FeedbackTemplate, FeedbackRequest, Question, Response, User
+from auth import init_auth, auto_login_dev_user, require_permission, ensure_authenticated, can_access_request, can_complete_request, get_users_for_assignment, get_or_create_dev_user
 from datetime import datetime
 import json
 import openai
@@ -260,6 +262,13 @@ def create_app(config_class=Config):
     
     db.init_app(app)
     migrate = Migrate(app, db)
+    init_auth(app)
+    
+    # Auto-login dev user on every request in dev mode
+    @app.before_request
+    def before_request():
+        if app.config['LOCAL_DEV_MODE']:
+            auto_login_dev_user()
     
     # Register routes
     register_routes(app)
@@ -271,15 +280,44 @@ def register_routes(app):
     
     @app.route('/')
     def index():
-        return render_template('index.html')
+        user = auto_login_dev_user()
+        return render_template('index.html', user=user)
+    
+    @app.route('/login')
+    def auth_login():
+        if app.config['LOCAL_DEV_MODE']:
+            user = get_or_create_dev_user()
+            if user:
+                login_user(user)
+                user.last_login = datetime.utcnow()
+                db.session.commit()
+                flash(f'Logged in as {user.name} (dev mode)', 'success')
+                return redirect(url_for('dashboard'))
+        
+        # In production, this would handle Google OAuth
+        flash('Authentication not configured for production mode.', 'error')
+        return render_template('login.html')
+    
+    @app.route('/logout')
+    @login_required
+    def auth_logout():
+        logout_user()
+        flash('You have been logged out.', 'success')
+        return redirect(url_for('index'))
 
     @app.route('/templates')
+    @login_required
     def list_templates():
         """List all feedback templates."""
+        user = ensure_authenticated()
+        if not user:
+            return redirect(url_for('auth_login'))
+        
         templates = FeedbackTemplate.query.order_by(FeedbackTemplate.created_at.desc()).all()
-        return render_template('templates/list.html', templates=templates)
+        return render_template('templates/list.html', templates=templates, user=user)
 
     @app.route('/templates/create', methods=['GET', 'POST'])
+    @require_permission('create_templates')
     def create_template():
         """Create a new feedback template."""
         if request.method == 'POST':
@@ -293,7 +331,8 @@ def register_routes(app):
                 name=name, 
                 description=description,
                 intro_text=intro_text,
-                is_supervisor_feedback=is_supervisor_feedback
+                is_supervisor_feedback=is_supervisor_feedback,
+                created_by_id=current_user.id
             )
             db.session.add(template)
             db.session.flush()
@@ -319,22 +358,45 @@ def register_routes(app):
         return render_template('templates/create.html')
 
     @app.route('/create', methods=['GET', 'POST'])
+    @login_required
     def create_request():
+        user = ensure_authenticated()
+        if not user:
+            return redirect(url_for('auth_login'))
+            
         if request.method == 'POST':
             target_name = request.form['target_name']
+            target_email = request.form.get('target_email', '')
             template_id = request.form['template_id']
+            assigned_to_id = request.form.get('assigned_to_id')
+            
+            # If no assignee specified, assign to current user (self-feedback)
+            if not assigned_to_id:
+                assigned_to_id = user.id
+            
+            # Check permissions for assigning to others
+            if assigned_to_id != user.id and not user.can_create_requests_for_others and not user.is_admin:
+                flash('You do not have permission to create feedback requests for others.', 'error')
+                return redirect(url_for('create_request'))
             
             # Create feedback request
-            feedback_request = FeedbackRequest(target_name=target_name, template_id=template_id)
+            feedback_request = FeedbackRequest(
+                target_name=target_name,
+                target_email=target_email,
+                template_id=template_id,
+                created_by_id=user.id,
+                assigned_to_id=assigned_to_id
+            )
             db.session.add(feedback_request)
             db.session.commit()
             
             flash('Feedback request created successfully!')
             return redirect(url_for('share_link', request_id=feedback_request.id))
         
-        # Get available templates
+        # Get available templates and users
         templates = FeedbackTemplate.query.order_by(FeedbackTemplate.name).all()
-        return render_template('create.html', templates=templates)
+        users = get_users_for_assignment() if user.can_create_requests_for_others or user.is_admin else [user]
+        return render_template('create.html', templates=templates, users=users, current_user=user)
 
     @app.route('/share/<request_id>')
     def share_link(request_id):
@@ -342,10 +404,21 @@ def register_routes(app):
         return render_template('share.html', feedback_request=feedback_request)
 
     @app.route('/survey/<request_id>')
+    @login_required
     def survey(request_id):
+        user = ensure_authenticated()
+        if not user:
+            return redirect(url_for('auth_login'))
+            
         feedback_request = FeedbackRequest.query.get_or_404(request_id)
+        
+        # Check if user can complete this request
+        if not can_complete_request(feedback_request, user):
+            flash('You are not assigned to complete this feedback request.', 'error')
+            return redirect(url_for('dashboard'))
+        
         questions = Question.query.filter_by(template_id=feedback_request.template_id).order_by(Question.order_index).all()
-        return render_template('survey.html', feedback_request=feedback_request, questions=questions)
+        return render_template('survey.html', feedback_request=feedback_request, questions=questions, user=user)
 
     @app.route('/api/chat/<question_id>', methods=['POST'])
     def chat_response(question_id):
@@ -579,9 +652,23 @@ Be warm, professional, and focused on helping them give the best possible feedba
         return render_template('thank_you.html')
 
     @app.route('/dashboard')
+    @login_required
     def dashboard():
-        """Dashboard to view all feedback requests and their status."""
-        feedback_requests = FeedbackRequest.query.order_by(FeedbackRequest.created_at.desc()).all()
+        """Dashboard to view feedback requests relevant to the current user."""
+        user = ensure_authenticated()
+        if not user:
+            return redirect(url_for('auth_login'))
+        
+        # Get requests created by or assigned to the user
+        if user.is_admin:
+            # Admins see all requests
+            feedback_requests = FeedbackRequest.query.order_by(FeedbackRequest.created_at.desc()).all()
+        else:
+            # Regular users see their created requests and assigned requests
+            feedback_requests = FeedbackRequest.query.filter(
+                (FeedbackRequest.created_by_id == user.id) | 
+                (FeedbackRequest.assigned_to_id == user.id)
+            ).order_by(FeedbackRequest.created_at.desc()).all()
         
         # Add submission count for each request
         requests_with_counts = []
@@ -595,17 +682,39 @@ Be warm, professional, and focused on helping them give the best possible feedba
                 'submitted_count': submitted_count
             })
         
-        return render_template('dashboard.html', requests_with_counts=requests_with_counts)
+        return render_template('dashboard.html', requests_with_counts=requests_with_counts, user=user)
 
     @app.route('/report/<request_id>')
+    @login_required
     def view_report(request_id):
+        user = ensure_authenticated()
+        if not user:
+            return redirect(url_for('auth_login'))
+            
         feedback_request = FeedbackRequest.query.get_or_404(request_id)
+        
+        # Check if user can access this request
+        if not can_access_request(feedback_request, user):
+            flash('You do not have permission to view this report.', 'error')
+            return redirect(url_for('dashboard'))
+        
         responses = Response.query.filter_by(feedback_request_id=request_id, is_draft=False).all()
-        return render_template('report.html', feedback_request=feedback_request, responses=responses)
+        return render_template('report.html', feedback_request=feedback_request, responses=responses, user=user)
 
     @app.route('/coaching/<request_id>')
+    @login_required
     def coaching_guide(request_id):
+        user = ensure_authenticated()
+        if not user:
+            return redirect(url_for('auth_login'))
+            
         feedback_request = FeedbackRequest.query.get_or_404(request_id)
+        
+        # Check if user can access this request
+        if not can_access_request(feedback_request, user):
+            flash('You do not have permission to view this coaching guide.', 'error')
+            return redirect(url_for('dashboard'))
+        
         responses = Response.query.filter_by(feedback_request_id=request_id, is_draft=False).all()
         questions = Question.query.filter_by(template_id=feedback_request.template_id).order_by(Question.order_index).all()
         
@@ -620,7 +729,8 @@ Be warm, professional, and focused on helping them give the best possible feedba
                              responses=responses, 
                              questions=questions,
                              safety_analysis=safety_analysis,
-                             coaching_content=coaching_content)
+                             coaching_content=coaching_content,
+                             user=user)
 
 # Create the app instance
 app = create_app()

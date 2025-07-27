@@ -21,6 +21,32 @@
                         </div>
 
                         <div class="mb-4">
+                            <label for="target_email" class="form-label">Email (optional)</label>
+                            <input type="email" class="form-control" id="target_email" name="target_email">
+                            <div class="form-text">Email address of the person being reviewed (for future notification features).</div>
+                        </div>
+
+                        {% if users|length > 1 %}
+                        <div class="mb-4">
+                            <label for="assigned_to_id" class="form-label">Assign to</label>
+                            <select class="form-select" id="assigned_to_id" name="assigned_to_id">
+                                {% for user in users %}
+                                <option value="{{ user.id }}" {% if user.id == current_user.id %}selected{% endif %}>
+                                    {{ user.name }} ({{ user.email }})
+                                    {% if user.id == current_user.id %} - You{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                Choose who should complete this feedback request. 
+                                {% if not current_user.can_create_requests_for_others %}
+                                You can only assign feedback requests to yourself.
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-4">
                             <label for="template_id" class="form-label">Feedback Template</label>
                             <select class="form-select" id="template_id" name="template_id" required>
                                 <option value="">Choose a template...</option>

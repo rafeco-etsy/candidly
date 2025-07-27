@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Candidly{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login to Candidly
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <p class="text-muted">Please log in to access your feedback dashboard.</p>
+                </div>
+
+                {% if config.LOCAL_DEV_MODE %}
+                <div class="alert alert-info">
+                    <i class="fas fa-code me-2"></i>
+                    <strong>Development Mode:</strong> Authentication is simplified for local development.
+                </div>
+                
+                <div class="d-grid">
+                    <a href="{{ url_for('auth_login') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-cog me-2"></i>Login as Dev User
+                    </a>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Production Mode:</strong> Google OAuth is not yet configured.
+                </div>
+                
+                <div class="d-grid">
+                    <button class="btn btn-outline-primary btn-lg" disabled>
+                        <i class="fab fa-google me-2"></i>Login with Google (Coming Soon)
+                    </button>
+                </div>
+                {% endif %}
+                
+                <div class="text-center mt-4">
+                    <small class="text-muted">
+                        <a href="{{ url_for('index') }}" class="text-decoration-none">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Home
+                        </a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

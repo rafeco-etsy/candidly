@@ -56,13 +56,21 @@ flask db upgrade
 python dev.py
 
 # Or manually:
-# Run development server
-python app.py
+# Run development server (in background for Claude Code)
+nohup python app.py > flask.log 2>&1 &
 # or
 flask run
 
+# Check if server is running
+lsof -ti:5001
+
+# View server logs
+tail -f flask.log
+
 # The app will be available at http://localhost:5001
 ```
+
+**Important for Claude Code**: Always start the Flask server in the background using `nohup` to prevent timeout issues. The synchronous `python app.py` command will timeout after 2 minutes and kill the server.
 
 ### Development Script Features
 The `dev.py` script automatically:
