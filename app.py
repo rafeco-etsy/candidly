@@ -1354,17 +1354,17 @@ CONTEXT:
 YOUR INITIAL MESSAGE should:
 1. Briefly acknowledge their working relationship
 2. Identify and recap the key questions/areas from their feedback form (if visible)
-3. Ask them to start with a broad overview - what's their general impression?
-4. Mention that you'll ask follow-up questions to help them think through specific examples
+3. Ask them to start with a broad overview covering ALL main areas
+4. Mention that you'll systematically work through each area they mention
 
 EXAMPLE STRUCTURE:
 "I can see you're providing feedback about [person] who [relationship]. Looking at your form, it seems like they're asking about [key areas like communication, leadership, collaboration, etc.].
 
-To get started, can you give me a broad overview? What's your general impression of working with [person] - what stands out to you as their main strengths and any areas where they could improve?
+To get started, can you give me a broad overview covering all the main areas? What's your general impression of working with [person] - what stands out as their key strengths, any areas for improvement, and their overall impact in [relevant areas from the form]?
 
-I'll ask follow-up questions to help you think through specific examples and situations that support your observations."
+I'll then ask follow-up questions to systematically work through each area you mention, making sure we cover everything comprehensively."
 
-TONE: Curious interviewer who only asks questions. Never write feedback content for them."""
+TONE: Systematic interviewer who ensures comprehensive coverage of all feedback topics. Adapts depth to the person's role while ensuring no important areas are missed."""
 
         response = client.chat.completions.create(
             model=app.config['OPENAI_MODEL'],
@@ -1384,28 +1384,32 @@ CONTEXT:
 - Working relationship: {relationship_context}  
 - Form content: {form_text or 'See previous messages for form details'}
 
-YOUR ROLE - QUESTION-ASKING INTERVIEWER ONLY:
+YOUR ROLE - SYSTEMATIC INTERVIEWER:
 
-IF they're giving broad/general feedback:
-- Acknowledge what they shared
-- Pick one area and ask for a specific example
-- "Can you give me a specific example of when they did that?"
+COVERAGE STRATEGY - Ensure you systematically cover all key feedback areas:
+1. Track which topics they've mentioned in their initial overview
+2. After exploring one area sufficiently, transition to the next important topic
+3. Make sure to cover all major feedback categories before they finish
 
-IF they're giving specific examples:
-- Ask follow-up questions to get more details
-- "What exactly did they say/do in that moment?" 
-- "How did that impact you/the project/the team?"
-- "What would have been more helpful in that situation?"
+ADJUST YOUR APPROACH based on the relationship:
+- If they're reviewing a senior leader/executive: Ask for broader observations and impacts rather than granular details
+- If they're reviewing a peer/colleague: Balance specific examples with general patterns
+- If they're reviewing someone junior: You can probe more deeply for specific situations and coaching opportunities
 
-PROBING QUESTIONS TO USE:
-- "Tell me about a specific time when..."
-- "What exactly happened in that situation?"
-- "How did that make you feel/impact the work?"
-- "What would you have wanted them to do differently?"
-- "Can you think of another example of that behavior?"
-- "Walk me through exactly what happened..."
+CONVERSATION FLOW:
+- Start with their broad overview to identify all key topics
+- Explore each topic appropriately (don't get stuck on one area)
+- Transition between topics: "Thanks for that detail on [topic]. Let's talk about [next topic] - you mentioned..."
+- Keep track of what you've covered vs. what still needs exploration
 
-CRITICAL: You are ONLY an interviewer. Never write feedback content, suggestions, or responses for them. Only ask questions to help them think deeper.
+PROBING QUESTIONS (choose appropriately):
+- "What patterns have you noticed in their [area]?"
+- "Can you give me an example of that?"
+- "How did that impact the work/team?"
+- "Let's shift to [another topic] you mentioned - tell me more about..."
+- "Before we finish, let's make sure we've covered [remaining topic]..."
+
+CRITICAL: You are ONLY an interviewer. Systematically cover all topics they raise. Don't get stuck drilling into just one area - ensure comprehensive coverage.
 
 Keep responses very short (1-2 sentences max) with a focused follow-up question."""
 
@@ -1414,10 +1418,24 @@ Keep responses very short (1-2 sentences max) with a focused follow-up question.
         if any(indicator in user_message.lower() for indicator in done_indicators):
             return generate_final_organized_feedback(client, relationship_context, form_text, chat_history)
         
-        messages = [{"role": "system", "content": system_prompt}]
+        # Analyze conversation to identify topics covered and remaining
+        conversation_analysis = f"""
+CONVERSATION ANALYSIS:
+Look at the conversation so far and identify:
+1. What feedback topics have been mentioned in their responses
+2. Which topics you've already explored sufficiently  
+3. Which important topics still need coverage
+4. Whether it's time to transition to a new area
+
+Based on this analysis, choose your next question to ensure comprehensive coverage."""
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "system", "content": conversation_analysis}
+        ]
         
-        # Add recent chat history (last 6 messages to keep context manageable)
-        for msg in chat_history[-6:]:
+        # Add full chat history for complete context and topic tracking
+        for msg in chat_history:
             messages.append(msg)
         
         messages.append({
@@ -1442,7 +1460,7 @@ Keep responses very short (1-2 sentences max) with a focused follow-up question.
             f"{msg['role']}: {msg['content']}" for msg in chat_history
         ])
         
-        organization_prompt = f"""Based on this conversation, organize the feedback they provided into a clean format for their external feedback form. Use ONLY their words and examples - don't add anything new.
+        organization_prompt = f"""Based on this conversation, organize and professionally present their feedback for the external form. Take an editorial approach while preserving their voice and observations.
 
 CONTEXT:
 - Working relationship: {relationship_context}
@@ -1450,35 +1468,43 @@ CONTEXT:
 - Conversation: {conversation_content}
 
 YOUR TASK:
-1. Extract all the specific examples, behaviors, and feedback THEY mentioned
-2. Organize them by theme/question area based on the form
-3. Present their content in a clean format using:
-   - Only their actual words and examples
-   - Their original phrasing and tone
-   - The specific situations they described
-   - NO additions or embellishments from you
+1. Extract their key observations, examples, and feedback from the conversation
+2. Organize by theme/question area based on the form structure
+3. Present professionally while preserving their authentic voice:
+   - Include relevant working relationship context where helpful
+   - Use their examples and specific observations
+   - Improve flow and structure without changing meaning
+   - Make it sound polished but authentic to them
+   - Ensure appropriate level of detail for the person being reviewed
+
+APPROACH:
+- Start responses with brief context about their working relationship when relevant
+- Structure their observations logically (strengths first, then development areas)
+- Use their specific examples but present them clearly
+- Maintain their tone but make it professionally appropriate
+- Balance honesty with constructiveness
 
 FORMAT your response as:
-## Your Feedback (Organized)
+## Your Professional Feedback
 
-**[Question/Area 1 from their form]:**
-[Their exact feedback and examples for this area, organized cleanly]
+**[Question/Area 1]:**
+[Working relationship context if relevant] [Their key observations organized professionally, using their examples and voice but with improved structure and flow]
 
-**[Question/Area 2 from their form]:**
-[Their exact feedback and examples for this area, organized cleanly]
+**[Question/Area 2]:**
+[Organized professional response using their content]
 
-[Continue for each area they covered]
+[Continue for each area]
 
 ---
-*This is your feedback organized by question area. Copy and paste into your external form as needed.*
+*This feedback preserves your observations and examples in a professional format ready for your external form.*
 
-CRITICAL: Use only what they said. Don't write new content, don't improve their language, don't add suggestions. Just organize their actual words."""
+Be editorial in organization and flow while keeping their authentic voice and observations."""
 
         response = client.chat.completions.create(
             model=app.config['OPENAI_MODEL'],
             messages=[{"role": "user", "content": organization_prompt}],
-            max_tokens=800,
-            temperature=0.1
+            max_tokens=1000,
+            temperature=0.4
         )
         
         return response.choices[0].message.content.strip()

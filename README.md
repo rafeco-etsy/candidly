@@ -1,10 +1,17 @@
 # Candidly
 
-An AI-powered peer feedback collection tool that uses conversational follow-ups to gather detailed, thoughtful feedback through intelligent chat conversations.
+An AI-powered feedback collection tool that helps users give thoughtful, detailed feedback through intelligent conversations. Features both traditional survey collection and a single-player mode for external forms.
 
 ![Candidly Demo](https://img.shields.io/badge/Status-Active-brightgreen) ![Python](https://img.shields.io/badge/Python-3.13-blue) ![Flask](https://img.shields.io/badge/Flask-2.3.3-red) ![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-orange)
 
 ## ✨ Features
+
+### 🎯 Single-Player Mode (NEW!)
+- **External Form Support**: Upload screenshots or paste text from any HRIS/external feedback form
+- **AI Interview Assistant**: Chat-based guidance to help you craft thoughtful responses
+- **Context-Aware**: AI understands working relationships and adapts questioning depth accordingly
+- **Systematic Coverage**: Ensures all feedback topics are explored comprehensively
+- **Copy & Paste Ready**: Generate professional responses ready for external forms
 
 ### 🤖 AI-Powered Conversations
 - **Intelligent Follow-ups**: GPT-4o conducts natural conversations to gather detailed feedback
@@ -12,7 +19,7 @@ An AI-powered peer feedback collection tool that uses conversational follow-ups 
 - **Verbose Organization**: Preserves ALL user content while organizing it professionally
 - **Regenerate Summaries**: Edit AI prompts directly to customize how feedback is organized
 
-### 📝 Flexible Survey Building
+### 📝 Traditional Survey Building
 - **Template System**: Create reusable feedback templates with rating and discussion questions
 - **Mixed Question Types**: Combine quick ratings (1-5 scale) with in-depth discussion questions
 - **Dashboard Management**: View all feedback requests and their status at a glance
@@ -26,7 +33,7 @@ An AI-powered peer feedback collection tool that uses conversational follow-ups 
 - **Review Before Submit**: Users can review and edit all responses before final submission
 
 ### 🎯 Enhanced User Experience
-- **Expanding Text Areas**: Multi-line input with keyboard shortcuts (Ctrl+Enter to send)
+- **Expanding Text Areas**: Multi-line input with keyboard shortcuts (Enter to send, Ctrl+Enter for new line)
 - **Real-time Updates**: Live feedback organization with loading states
 - **Professional Reports**: Print-ready feedback reports with structured formatting
 - **Coaching Guides**: AI-generated guidance for delivering feedback effectively
@@ -61,6 +68,33 @@ An AI-powered peer feedback collection tool that uses conversational follow-ups 
    ```
    
    The app will be available at http://localhost:5001
+
+## 🎯 Single-Player Mode
+
+Perfect for when you need to complete feedback in external systems (Workday, BambooHR, etc.):
+
+1. **Access**: Navigate to `/single-player` or click "AI Feedback Assistant" from dashboard
+2. **Upload Context**: Screenshot your feedback form or paste the questions
+3. **Describe Relationship**: Tell the AI about your working relationship with the person
+4. **Chat Interview**: AI guides you through systematic feedback gathering
+5. **Final Organization**: Get professionally organized responses ready to copy/paste
+
+### Example Single-Player Flow
+```
+AI: I can see this form asks about leadership and collaboration. 
+    Let's start with leadership - can you give me a broad overview 
+    of how they approach leading projects or teams?
+
+You: They're really good at keeping projects on track and making 
+     sure everyone knows what they need to do...
+
+AI: That's great! Can you share a specific example of when they 
+    kept a project on track? What did they actually do?
+
+[Continue conversation...]
+
+Final Output: Professional, organized feedback ready for your external form
+```
 
 ## 🛠️ Development
 
@@ -99,9 +133,10 @@ flask db upgrade
 ## 🏗️ Architecture
 
 ### Core Components
+- **Single-Player Mode**: AI interview assistant for external feedback forms
 - **Survey Builder**: Create feedback requests with mixed question types
-- **AI Chat Interface**: GPT-3.5-turbo powered conversational follow-ups
-- **Smart Summarization**: Convert conversations into professional feedback
+- **AI Chat Interface**: GPT-4o powered conversational follow-ups
+- **Smart Organization**: Convert conversations into professional feedback while preserving all details
 - **Review Interface**: Edit and approve responses before submission
 - **Template System**: Reusable feedback question sets with dashboard management
 
@@ -113,12 +148,21 @@ flask db upgrade
 - **Testing**: pytest with Flask-testing and comprehensive test coverage
 
 ### Data Flow
+
+**Traditional Survey Mode:**
 1. **Template Creation**: Define reusable question sets
 2. **Request Setup**: Create feedback requests from templates or custom questions
 3. **Response Collection**: Users answer ratings directly, chat for discussions
-4. **AI Processing**: Contextual follow-ups and intelligent summarization
+4. **AI Processing**: Contextual follow-ups and intelligent organization
 5. **Review & Submit**: Final review and approval before submission
 6. **Reporting**: Compiled feedback available to requestors
+
+**Single-Player Mode:**
+1. **Form Upload**: Screenshot or paste external feedback form questions
+2. **Context Setting**: Describe working relationship with feedback recipient
+3. **AI Interview**: Systematic chat-based exploration of all feedback topics
+4. **Organization**: AI creates professional responses while preserving all user content
+5. **Export**: Copy organized feedback for use in external systems
 
 ## 📖 Usage Examples
 
@@ -174,7 +218,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built with [Flask](https://flask.palletsprojects.com/) and [OpenAI GPT-3.5-turbo](https://openai.com/)
+- Built with [Flask](https://flask.palletsprojects.com/) and [OpenAI GPT-4o](https://openai.com/)
 - UI powered by [Bootstrap 5](https://getbootstrap.com/)
 - Icons from [Font Awesome](https://fontawesome.com/)
 
