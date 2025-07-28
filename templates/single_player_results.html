@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback Guidance - Candidly{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-check-circle me-2"></i>Your Feedback Guidance
+                </h4>
+                <small>Complete guidance for your external feedback form</small>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Main Content -->
+                    <div class="col-md-6">
+                        <div id="guidance-content">
+                            {{ guidance|safe }}
+                        </div>
+                    </div>
+                    
+                    <!-- Chat Section -->
+                    <div class="col-md-3">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-comments me-2"></i>Collaborate with AI
+                                </h6>
+                                <small>Ask follow-up questions or refine responses</small>
+                            </div>
+                            <div class="card-body p-0 d-flex flex-column">
+                                <!-- Chat Messages -->
+                                <div id="chat-messages" class="flex-grow-1 p-3" style="height: 400px; overflow-y: auto; background-color: #f8f9fa;">
+                                    <div class="mb-3">
+                                        <div class="bg-primary text-white p-2 rounded-3 small">
+                                            <i class="fas fa-robot me-1"></i>
+                                            I've created comprehensive guidance above! Feel free to ask follow-up questions like:
+                                            <ul class="mb-0 mt-2">
+                                                <li>"Help me write a response for question 2"</li>
+                                                <li>"Can you suggest specific examples?"</li>
+                                                <li>"How should I phrase this feedback?"</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Chat Input -->
+                                <div class="border-top p-2">
+                                    <form id="chat-form" class="d-flex">
+                                        <input type="text" id="chat-input" class="form-control form-control-sm me-2" 
+                                               placeholder="Ask about specific questions..." required>
+                                        <button type="submit" class="btn btn-primary btn-sm" id="send-btn" data-loading="Sending...">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions Sidebar -->
+                    <div class="col-md-3">
+                        <div class="sticky-top" style="top: 20px;">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-tools me-2"></i>Actions
+                                    </h6>
+                                    
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" id="copy-all-btn">
+                                            <i class="fas fa-copy me-1"></i>Copy All Text
+                                        </button>
+                                        
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+                                            <i class="fas fa-print me-1"></i>Print
+                                        </button>
+                                        
+                                        <hr class="my-3">
+                                        
+                                        <a href="{{ url_for('single_player_mode') }}" class="btn btn-success btn-sm" data-loading="Loading...">
+                                            <i class="fas fa-plus me-1"></i>New Session
+                                        </a>
+                                        
+                                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm" data-loading="Loading...">
+                                            <i class="fas fa-arrow-left me-1"></i>Dashboard
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card bg-info bg-opacity-10 border-info mt-3">
+                                <div class="card-body p-3">
+                                    <h6 class="text-info">
+                                        <i class="fas fa-lightbulb me-2"></i>Tips
+                                    </h6>
+                                    <small class="text-info">
+                                        • Use this guidance as a reference while filling out your external form<br>
+                                        • Copy specific sections as needed<br>
+                                        • Adapt the language to match your organization's style<br>
+                                        • Be specific with examples from your actual work together
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Make the guidance content more readable */
+#guidance-content {
+    line-height: 1.6;
+}
+
+#guidance-content h1 {
+    color: #198754;
+    border-bottom: 2px solid #198754;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+#guidance-content h2 {
+    color: #0d6efd;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+#guidance-content h3 {
+    color: #6f42c1;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+#guidance-content p {
+    margin-bottom: 1rem;
+}
+
+#guidance-content ul, #guidance-content ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+#guidance-content li {
+    margin-bottom: 0.25rem;
+}
+
+#guidance-content strong {
+    color: #495057;
+}
+
+/* Print styles */
+@media print {
+    .col-md-3, .card-header, .btn, .sticky-top {
+        display: none !important;
+    }
+    
+    .col-md-9 {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .card-body {
+        padding: 0 !important;
+    }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Convert markdown to HTML if needed
+    const guidanceContent = document.getElementById('guidance-content');
+    if (typeof marked !== 'undefined') {
+        // Check if content looks like markdown
+        const content = guidanceContent.textContent || guidanceContent.innerText;
+        if (content.includes('##') || content.includes('**') || content.includes('- ')) {
+            guidanceContent.innerHTML = marked.parse(content);
+        }
+    }
+    
+    // Copy all text functionality
+    document.getElementById('copy-all-btn').addEventListener('click', function() {
+        const content = document.getElementById('guidance-content');
+        const textContent = content.innerText || content.textContent;
+        
+        navigator.clipboard.writeText(textContent).then(function() {
+            const btn = document.getElementById('copy-all-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-primary');
+            }, 2000);
+        }).catch(function(err) {
+            console.error('Could not copy text: ', err);
+            alert('Could not copy to clipboard. Please select and copy the text manually.');
+        });
+    });
+    
+    // Chat functionality
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    
+    function scrollChatToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function addChatMessage(content, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'mb-3';
+        
+        if (isUser) {
+            messageDiv.innerHTML = `
+                <div class="d-flex justify-content-end">
+                    <div class="bg-white border p-2 rounded-3 small" style="max-width: 85%;">
+                        ${content}
+                    </div>
+                </div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="d-flex justify-content-start">
+                    <div class="bg-primary text-white p-2 rounded-3 small" style="max-width: 85%;">
+                        <i class="fas fa-robot me-1"></i>
+                        <span class="ai-response">${content}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        chatMessages.appendChild(messageDiv);
+        
+        // Render markdown for AI responses
+        if (!isUser && typeof marked !== 'undefined') {
+            const aiResponse = messageDiv.querySelector('.ai-response');
+            if (aiResponse) {
+                aiResponse.innerHTML = marked.parse(content);
+            }
+        }
+        
+        scrollChatToBottom();
+    }
+    
+    chatForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const message = chatInput.value.trim();
+        if (!message) return;
+        
+        // Add user message
+        addChatMessage(message, true);
+        
+        // Clear input and disable send button
+        chatInput.value = '';
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
+        // Send to AI
+        fetch('/api/single-player-followup', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                addChatMessage('Sorry, I encountered an error. Please try again.', false);
+            } else {
+                addChatMessage(data.response, false);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            addChatMessage('Sorry, I encountered an error. Please try again.', false);
+        })
+        .finally(() => {
+            // Re-enable send button
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+            chatInput.focus();
+        });
+    });
+    
+    // Focus on chat input
+    chatInput.focus();
+});
+</script>
+{% endblock %}

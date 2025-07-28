@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_migrate import Migrate
 from flask_login import login_required, current_user, login_user, logout_user
 from config import Config
@@ -8,6 +8,7 @@ from datetime import datetime
 import json
 import openai
 import os
+import base64
 
 def generate_personalized_coaching(feedback_request, responses, safety_analysis):
     """Generate personalized coaching content based on actual feedback and relationship dynamics."""
@@ -819,6 +820,669 @@ IMPORTANT: Always respond with just ONE question or acknowledgment. Keep respons
             role_data[role] = requests_with_counts
         
         return render_template('dashboard.html', role_data=role_data, user=user)
+
+    @app.route('/single-player', methods=['GET', 'POST'])
+    @login_required
+    def single_player_mode():
+        """Single-player mode for completing external feedback forms with AI assistance."""
+        user = ensure_authenticated()
+        if not user:
+            return redirect(url_for('auth_login'))
+        
+        if request.method == 'POST':
+            # Handle form submission to start AI-assisted session
+            form_text = request.form.get('form_text', '').strip()
+            relationship_context = request.form.get('relationship_context', '').strip()
+            uploaded_file = request.files.get('form_screenshot')
+            
+            # Store uploaded screenshot for later analysis
+            screenshot_data = None
+            screenshot_filename = None
+            if uploaded_file and uploaded_file.filename:
+                try:
+                    # Store the image data temporarily (not in session due to size limits)
+                    screenshot_data = uploaded_file.read()
+                    screenshot_filename = uploaded_file.filename
+                    print(f"Screenshot uploaded: {screenshot_filename}, size: {len(screenshot_data)} bytes")
+                except Exception as e:
+                    print(f"Error reading screenshot: {e}")
+                    screenshot_data = None
+            
+            if not form_text and not uploaded_file:
+                flash('Please provide either the feedback form text or upload a screenshot.', 'error')
+                return redirect(url_for('single_player_mode'))
+            
+            if not relationship_context:
+                flash('Please describe your working relationship with the person.', 'error')
+                return redirect(url_for('single_player_mode'))
+            
+            # Process the form data immediately and redirect to chat with initial guidance
+            try:
+                client = openai.OpenAI(api_key=app.config['OPENAI_API_KEY'])
+                
+                # Generate initial guidance immediately
+                initial_guidance = generate_initial_feedback_guidance(
+                    client, relationship_context, form_text, screenshot_data
+                )
+                
+                # Store minimal context in session (just for this chat session)
+                session['chat_context'] = {
+                    'relationship_context': relationship_context,
+                    'form_text': form_text,
+                    'has_screenshot': bool(screenshot_data),
+                    'initial_guidance': initial_guidance
+                }
+                
+                return redirect(url_for('single_player_chat'))
+                
+            except Exception as e:
+                print(f"Error generating feedback guidance: {e}")
+                flash('Error processing your feedback form. Please try again.', 'error')
+                return redirect(url_for('single_player_mode'))
+        
+        # Clear any existing chat context for fresh start
+        session.pop('chat_context', None)
+        
+        return render_template('single_player.html', user=user)
+
+
+
+
+    def analyze_screenshot_with_vision(image_data, filename):
+        """Analyze screenshot using OpenAI Vision API to extract feedback form text."""
+        try:
+            # Encode image to base64
+            base64_image = base64.b64encode(image_data).decode('utf-8')
+            
+            # Initialize OpenAI client
+            client = openai.OpenAI(api_key=app.config['OPENAI_API_KEY'])
+            
+            response = client.chat.completions.create(
+                model="gpt-4o",  # Use GPT-4o which has vision capabilities
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": """Please extract all the text from this feedback form image. Focus on:
+1. Feedback questions (usually numbered or bulleted)
+2. Form labels and instructions
+3. Any other relevant text
+
+Please provide the extracted text in a clear, structured format that preserves the questions and their numbering/organization. If there are feedback questions, list them clearly."""
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}",
+                                    "detail": "high"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                max_tokens=800,
+                temperature=0.3
+            )
+            
+            extracted_text = response.choices[0].message.content.strip()
+            return extracted_text
+            
+        except Exception as e:
+            print(f"Error analyzing screenshot with vision: {e}")
+            return f"[Screenshot uploaded: {filename} - Could not extract text from image]"
+
+    def analyze_screenshot_immediately(client, image_data, relationship_context, form_text):
+        """Immediately analyze screenshot and extract comprehensive form information."""
+        try:
+            # Encode image to base64
+            base64_image = base64.b64encode(image_data).decode('utf-8')
+            
+            analysis_prompt = f"""Analyze this feedback form image comprehensively.
+
+CONTEXT:
+- Working relationship: {relationship_context}
+- Additional form text: {form_text if form_text else 'None provided'}
+
+YOUR TASK:
+1. Extract ALL text visible in the image
+2. Identify specific feedback questions
+3. Note any form structure, labels, or instructions
+4. Provide a clear summary of what feedback is being requested
+
+Please provide a comprehensive analysis that includes:
+- The exact questions visible
+- Any form instructions or context
+- Overall structure and purpose of the form
+
+Be thorough and specific about what you can see in the image."""
+
+            response = client.chat.completions.create(
+                model="gpt-4o",  # Use GPT-4o which has vision capabilities
+                messages=[
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": analysis_prompt
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}",
+                                    "detail": "high"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                max_tokens=800,
+                temperature=0.3
+            )
+            
+            analysis_result = response.choices[0].message.content.strip()
+            print(f"Screenshot analysis successful: {len(analysis_result)} chars")
+            return analysis_result
+            
+        except Exception as e:
+            print(f"Error in immediate screenshot analysis: {e}")
+            return f"[Screenshot analysis failed: {str(e)}]"
+
+    @app.route('/single-player/chat')
+    @login_required
+    def single_player_chat():
+        """Chat interface for single-player feedback assistance."""
+        user = ensure_authenticated()
+        if not user:
+            return redirect(url_for('auth_login'))
+        
+        # Check if we have chat context from form submission
+        chat_context = session.get('chat_context')
+        if not chat_context:
+            flash('Please start a new single-player session.', 'info')
+            return redirect(url_for('single_player_mode'))
+        
+        return render_template('single_player_chat.html', 
+                             relationship_context=chat_context['relationship_context'],
+                             form_text=chat_context.get('form_text'),
+                             has_screenshot=chat_context.get('has_screenshot', False),
+                             initial_guidance=chat_context['initial_guidance'],
+                             user=user)
+
+    def parse_feedback_questions(client, form_content):
+        """Parse feedback form content to extract individual questions."""
+        # Check if content is insufficient
+        if not form_content or len(form_content.strip()) < 20:
+            return []  # Return empty list to indicate no questions could be parsed
+        
+        # Check if this is a failed screenshot processing message
+        if form_content.startswith('[Screenshot uploaded:') and 'Could not' in form_content:
+            return []  # Return empty list to indicate no questions could be parsed
+        
+        try:
+            response = client.chat.completions.create(
+                model=app.config['OPENAI_MODEL'],
+                messages=[{
+                    "role": "system",
+                    "content": """You are analyzing a feedback form to extract individual questions. 
+                    
+                    Parse the form content and return a JSON array of the individual feedback questions.
+                    Each question should be clean, complete, and specific.
+                    
+                    Example:
+                    Input: "1. How does this person communicate? 2. What are their strengths? 3. Areas for improvement?"
+                    Output: ["How does this person communicate?", "What are their strengths?", "What areas would you recommend for improvement?"]
+                    
+                    If the content doesn't contain clear feedback questions, return an empty array: []
+                    
+                    Return ONLY the JSON array, no other text."""
+                }, {
+                    "role": "user", 
+                    "content": f"Extract the feedback questions from this form:\n\n{form_content}"
+                }],
+                max_tokens=500,
+                temperature=0.3
+            )
+            
+            result = response.choices[0].message.content.strip()
+            # Try to parse as JSON, fallback to simple splitting if it fails
+            try:
+                import json
+                questions = json.loads(result)
+                if isinstance(questions, list) and len(questions) > 0:
+                    return questions
+                else:
+                    return []  # Empty list if no valid questions found
+            except:
+                # Fallback: simple parsing
+                lines = form_content.split('\n')
+                questions = []
+                for line in lines:
+                    line = line.strip()
+                    if line and ('?' in line or any(line.startswith(str(i)) for i in range(1, 20))):
+                        # Clean up numbering and formatting
+                        cleaned = line
+                        # Remove leading numbers and dots
+                        import re
+                        cleaned = re.sub(r'^\d+[\.\)]\s*', '', cleaned)
+                        if cleaned and len(cleaned) > 10:  # Ensure it's a substantial question
+                            questions.append(cleaned)
+                return questions
+                
+        except Exception as e:
+            print(f"Error parsing questions: {e}")
+            return []
+
+    def parse_feedback_questions_comprehensive(client, form_text, screenshot_data, relationship_context):
+        """Parse feedback form content including images to extract individual questions."""
+        try:
+            # Build message content for comprehensive analysis
+            message_content = []
+            
+            analysis_prompt = f"""Analyze this feedback form setup and extract the individual questions.
+
+CONTEXT:
+- Working relationship: {relationship_context}
+- Form text provided: {form_text if form_text else 'None'}
+
+YOUR TASK:
+1. Look at all available information (text and image if provided)
+2. Extract the individual feedback questions
+3. Return a clean JSON array of the questions
+4. Each question should be complete and specific
+
+REQUIREMENTS:
+- Return ONLY a valid JSON array like: ["Question 1", "Question 2", "Question 3"]
+- If no clear questions are found, return an empty array: []
+- Clean up any numbering or formatting from the questions
+- Make sure each question is complete and understandable
+
+Example output: ["How effectively does this person communicate?", "What are their key strengths?", "What areas would you recommend for development?"]"""
+            
+            message_content.append({
+                "type": "text",
+                "text": analysis_prompt
+            })
+            
+            # Add screenshot if available
+            if screenshot_data:
+                message_content.append({
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{screenshot_data}",
+                        "detail": "high"
+                    }
+                })
+            
+            response = client.chat.completions.create(
+                model="gpt-4o",  # Use vision model
+                messages=[{
+                    "role": "user",
+                    "content": message_content
+                }],
+                max_tokens=500,
+                temperature=0.3
+            )
+            
+            result = response.choices[0].message.content.strip()
+            
+            # Try to parse as JSON
+            try:
+                import json
+                questions = json.loads(result)
+                return questions if isinstance(questions, list) else []
+            except:
+                # Fallback to empty array if parsing fails
+                print(f"Could not parse questions JSON: {result}")
+                return []
+                
+        except Exception as e:
+            print(f"Error in comprehensive question parsing: {e}")
+            return []
+
+    def handle_initial_summary(client, sp_session):
+        """Generate initial summary message explaining what we're working on."""
+        try:
+            relationship_context = sp_session['relationship_context']
+            form_text = sp_session.get('form_text', '')
+            screenshot_analysis = sp_session.get('screenshot_analysis', '')
+            screenshot_filename = sp_session.get('screenshot_filename')
+            
+            # Combine all available form content
+            all_form_content = []
+            if form_text:
+                all_form_content.append(f"Form text: {form_text}")
+            if screenshot_analysis:
+                all_form_content.append(f"Screenshot analysis: {screenshot_analysis}")
+            
+            form_content_summary = "\n".join(all_form_content) if all_form_content else "No form content available"
+            
+            summary_prompt = f"""Create a welcoming summary message for a feedback assistance session.
+
+WORKING RELATIONSHIP: {relationship_context}
+FORM CONTENT: {form_content_summary}
+
+YOUR TASK:
+1. Identify who is giving feedback and who it's about (parse the relationship carefully)
+2. Understand what collaboration areas are relevant
+3. Analyze the form content to understand what questions need to be answered
+4. Create a friendly, clear opening message that:
+   - Acknowledges what we're doing (feedback assistance)
+   - Names who the feedback is about
+   - References their working relationship/collaboration areas
+   - Acknowledges the specific form questions you can identify
+   - Explains you'll help them think through examples and craft responses
+   - Does NOT suggest what to write, just sets up the process
+
+Keep it conversational and helpful. Focus on understanding and setup, not prescribing content."""
+
+            response = client.chat.completions.create(
+                model=app.config['OPENAI_MODEL'],
+                messages=[{
+                    "role": "user",
+                    "content": summary_prompt
+                }],
+                max_tokens=400,
+                temperature=0.7
+            )
+            
+            summary_response = response.choices[0].message.content.strip()
+            
+            return jsonify({
+                'response': summary_response,
+                'initial_summary': True
+            })
+            
+        except Exception as e:
+            print(f"Error generating initial summary: {e}")
+            return jsonify({
+                'response': "Hi! I'm here to help you craft thoughtful feedback for your external form. Let me know what feedback questions you need help with, and I'll guide you through creating specific, actionable responses.",
+                'error': True
+            })
+
+    def handle_generate_final_output(client, sp_session):
+        """Generate final polished responses for all questions."""
+        try:
+            parsed_questions = sp_session.get('parsed_questions', [])
+            completed_responses = sp_session.get('completed_responses', {})
+            chat_history = sp_session.get('chat_history', [])
+            relationship_context = sp_session['relationship_context']
+            
+            # Build conversation summary
+            conversation_summary = "\n".join([
+                f"{msg['role'].upper()}: {msg['content']}" 
+                for msg in chat_history[-20:]  # Last 20 messages
+            ])
+            
+            system_prompt = f"""Based on our conversation, generate polished, professional feedback responses for each question.
+
+CONTEXT:
+- Working relationship: {relationship_context}
+- Questions to answer: {parsed_questions}
+- Our conversation: {conversation_summary}
+
+Generate a clean, professional response for each question. Each response should be:
+- Specific and actionable
+- Professional in tone
+- Based on the examples and insights from our conversation
+- 2-4 sentences per response
+- Balanced between strengths and areas for improvement
+
+Format as markdown with each question as a heading and the response below it."""
+
+            response = client.chat.completions.create(
+                model=app.config['OPENAI_MODEL'],
+                messages=[{
+                    "role": "system",
+                    "content": system_prompt
+                }, {
+                    "role": "user",
+                    "content": "Please generate the final feedback responses based on our conversation."
+                }],
+                max_tokens=800,
+                temperature=0.7
+            )
+            
+            final_output = response.choices[0].message.content.strip()
+            
+            return jsonify({
+                'response': final_output,
+                'final_output': True
+            })
+            
+        except Exception as e:
+            print(f"Error generating final output: {e}")
+            return jsonify({
+                'response': "I'm having trouble generating the final output. Could you try again?",
+                'error': True
+            })
+
+    @app.route('/api/single-player-chat', methods=['POST'])
+    @login_required
+    def single_player_chat_api():
+        """API endpoint for single-player chat interactions."""
+        user = ensure_authenticated()
+        if not user:
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        data = request.get_json()
+        user_message = data.get('message', '').strip()
+        action = data.get('action')  # 'start' for initial message, 'chat' for follow-up
+        chat_history = data.get('chat_history', [])  # Chat history from frontend
+        
+        # Get minimal context from session
+        chat_context = session.get('chat_context')
+        if not chat_context:
+            return jsonify({'error': 'No active session'}), 400
+        
+        if action != 'start' and not user_message:
+            return jsonify({'error': 'Message required'}), 400
+        
+        try:
+            client = openai.OpenAI(api_key=app.config['OPENAI_API_KEY'])
+            
+            if action == 'start':
+                # Return the pre-generated initial guidance
+                response_text = chat_context['initial_guidance']
+            else:
+                # Handle follow-up questions with context
+                response_text = handle_feedback_followup(
+                    client, 
+                    chat_context['relationship_context'], 
+                    chat_context.get('form_text'), 
+                    user_message, 
+                    chat_history
+                )
+            
+            return jsonify({
+                'response': response_text
+            })
+            
+        except Exception as e:
+            print(f"Single-player chat error: {e}")
+            return jsonify({
+                'response': "I'm having trouble connecting to the AI service. Could you try rephrasing your message?",
+                'error': True
+            })
+    
+    def generate_initial_feedback_guidance(client, relationship_context, form_text, screenshot_data):
+        """Generate initial focused guidance for the feedback form."""
+        
+        # Analyze form content (screenshot or text)
+        if screenshot_data:
+            # Use Vision API to read screenshot
+            try:
+                import base64
+                base64_image = base64.b64encode(screenshot_data).decode('utf-8')
+                
+                vision_response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[{
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "Extract the text content from this feedback form screenshot. Focus on identifying the specific questions that need to be answered."
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{base64_image}"
+                                }
+                            }
+                        ]
+                    }],
+                    max_tokens=500
+                )
+                
+                form_content = vision_response.choices[0].message.content
+            except Exception as e:
+                print(f"Vision API error: {e}")
+                form_content = form_text or "Unable to read screenshot"
+        else:
+            form_content = form_text or "No form content provided"
+        
+        # Generate focused guidance prompt
+        guidance_prompt = f"""You are a feedback expert helping someone complete an external feedback form. Your role is to probe deeply into their working relationship to gather specific, actionable feedback.
+
+CONTEXT:
+- Working relationship: {relationship_context}
+- Form content: {form_content}
+
+YOUR INITIAL MESSAGE should:
+1. Briefly acknowledge their working relationship
+2. Identify and recap the key questions/areas from their feedback form (if visible)
+3. Ask them to start with a broad overview - what's their general impression?
+4. Mention that you'll ask follow-up questions to help them think through specific examples
+
+EXAMPLE STRUCTURE:
+"I can see you're providing feedback about [person] who [relationship]. Looking at your form, it seems like they're asking about [key areas like communication, leadership, collaboration, etc.].
+
+To get started, can you give me a broad overview? What's your general impression of working with [person] - what stands out to you as their main strengths and any areas where they could improve?
+
+I'll ask follow-up questions to help you think through specific examples and situations that support your observations."
+
+TONE: Curious interviewer who only asks questions. Never write feedback content for them."""
+
+        response = client.chat.completions.create(
+            model=app.config['OPENAI_MODEL'],
+            messages=[{"role": "user", "content": guidance_prompt}],
+            max_tokens=300,
+            temperature=0.7
+        )
+        
+        return response.choices[0].message.content.strip()
+    
+    def handle_feedback_followup(client, relationship_context, form_text, user_message, chat_history):
+        """Handle follow-up questions in the feedback chat."""
+        
+        system_prompt = f"""You are a skilled interviewer helping someone think through their feedback for an external form. You ONLY ask questions - you never write feedback content for them.
+
+CONTEXT:
+- Working relationship: {relationship_context}  
+- Form content: {form_text or 'See previous messages for form details'}
+
+YOUR ROLE - QUESTION-ASKING INTERVIEWER ONLY:
+
+IF they're giving broad/general feedback:
+- Acknowledge what they shared
+- Pick one area and ask for a specific example
+- "Can you give me a specific example of when they did that?"
+
+IF they're giving specific examples:
+- Ask follow-up questions to get more details
+- "What exactly did they say/do in that moment?" 
+- "How did that impact you/the project/the team?"
+- "What would have been more helpful in that situation?"
+
+PROBING QUESTIONS TO USE:
+- "Tell me about a specific time when..."
+- "What exactly happened in that situation?"
+- "How did that make you feel/impact the work?"
+- "What would you have wanted them to do differently?"
+- "Can you think of another example of that behavior?"
+- "Walk me through exactly what happened..."
+
+CRITICAL: You are ONLY an interviewer. Never write feedback content, suggestions, or responses for them. Only ask questions to help them think deeper.
+
+Keep responses very short (1-2 sentences max) with a focused follow-up question."""
+
+        # Check if user is indicating they're done and want final feedback
+        done_indicators = ['done', 'finished', 'complete', 'ready', 'organize', 'clean up', 'final', 'submit']
+        if any(indicator in user_message.lower() for indicator in done_indicators):
+            return generate_final_organized_feedback(client, relationship_context, form_text, chat_history)
+        
+        messages = [{"role": "system", "content": system_prompt}]
+        
+        # Add recent chat history (last 6 messages to keep context manageable)
+        for msg in chat_history[-6:]:
+            messages.append(msg)
+        
+        messages.append({
+            "role": "user",
+            "content": user_message
+        })
+        
+        response = client.chat.completions.create(
+            model=app.config['OPENAI_MODEL'],
+            messages=messages,
+            max_tokens=200,
+            temperature=0.7
+        )
+        
+        return response.choices[0].message.content.strip()
+    
+    def generate_final_organized_feedback(client, relationship_context, form_text, chat_history):
+        """Generate final organized feedback based on the conversation."""
+        
+        # Extract all the specific examples and feedback from the conversation
+        conversation_content = "\n".join([
+            f"{msg['role']}: {msg['content']}" for msg in chat_history
+        ])
+        
+        organization_prompt = f"""Based on this conversation, organize the feedback they provided into a clean format for their external feedback form. Use ONLY their words and examples - don't add anything new.
+
+CONTEXT:
+- Working relationship: {relationship_context}
+- Form content: {form_text or 'General feedback form'}
+- Conversation: {conversation_content}
+
+YOUR TASK:
+1. Extract all the specific examples, behaviors, and feedback THEY mentioned
+2. Organize them by theme/question area based on the form
+3. Present their content in a clean format using:
+   - Only their actual words and examples
+   - Their original phrasing and tone
+   - The specific situations they described
+   - NO additions or embellishments from you
+
+FORMAT your response as:
+## Your Feedback (Organized)
+
+**[Question/Area 1 from their form]:**
+[Their exact feedback and examples for this area, organized cleanly]
+
+**[Question/Area 2 from their form]:**
+[Their exact feedback and examples for this area, organized cleanly]
+
+[Continue for each area they covered]
+
+---
+*This is your feedback organized by question area. Copy and paste into your external form as needed.*
+
+CRITICAL: Use only what they said. Don't write new content, don't improve their language, don't add suggestions. Just organize their actual words."""
+
+        response = client.chat.completions.create(
+            model=app.config['OPENAI_MODEL'],
+            messages=[{"role": "user", "content": organization_prompt}],
+            max_tokens=800,
+            temperature=0.1
+        )
+        
+        return response.choices[0].message.content.strip()
+
 
     @app.route('/api/email-suggestions')
     @login_required

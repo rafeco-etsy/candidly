@@ -24,10 +24,10 @@
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-between mt-4">
-                        <a href="{{ url_for('survey', request_id=feedback_request.id) }}" class="btn btn-outline-secondary">
+                        <a href="{{ url_for('survey', request_id=feedback_request.id) }}" class="btn btn-outline-secondary" data-loading="Loading...">
                             <i class="fas fa-arrow-left me-2"></i>Back to Survey
                         </a>
-                        <button type="submit" class="btn btn-success btn-lg">
+                        <button type="submit" class="btn btn-success btn-lg" data-loading="Submitting Feedback...">
                             <i class="fas fa-paper-plane me-2"></i>Submit Feedback
                         </button>
                     </div>

@@ -164,7 +164,10 @@
                     </div>
 
                     <div class="text-center mt-4">
-                        <button class="btn btn-outline-primary" onclick="window.print()">
+                        <a href="{{ url_for('coaching_guide', request_id=feedback_request.id) }}" class="btn btn-warning">
+                            <i class="fas fa-graduation-cap me-2"></i>Get Coaching Guide
+                        </a>
+                        <button class="btn btn-outline-primary ms-2" onclick="window.print()">
                             <i class="fas fa-print me-2"></i>Print Report
                         </button>
                         <button class="btn btn-outline-secondary ms-2" onclick="toggleAllTranscripts()">

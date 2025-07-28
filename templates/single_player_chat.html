@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+
+{% block title %}AI Feedback Chat - Candidly{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0">
+                            <i class="fas fa-robot me-2"></i>AI Feedback Assistant
+                        </h4>
+                        <small>Get help crafting thoughtful feedback responses</small>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('single_player_mode') }}" class="btn btn-outline-light btn-sm" data-loading="Loading...">
+                            <i class="fas fa-plus me-1"></i>New Session
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chat Interface -->
+            <div class="card-body p-0" style="height: 70vh; display: flex; flex-direction: column;">
+                
+                <!-- Chat Messages -->
+                <div id="chat-messages" class="flex-grow-1 p-3" style="overflow-y: auto; background-color: #f8f9fa;">
+                    <!-- Initial AI message -->
+                    <div class="message ai-message">
+                        <div class="message-content" id="initial-guidance">
+                            <!-- Will be rendered with markdown -->
+                        </div>
+                        <div class="message-time">
+                            Just now
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat Input -->
+                <div class="border-top p-3">
+                    <div class="d-flex gap-2 align-items-end">
+                        <div class="flex-grow-1">
+                            <textarea id="chat-input" class="form-control" 
+                                      rows="1"
+                                      placeholder="Share your detailed feedback and examples... (Press Enter to send, Ctrl+Enter for new line)" 
+                                      maxlength="3000"
+                                      style="resize: none; min-height: 38px; max-height: 200px;"></textarea>
+                            <div class="d-flex justify-content-end mt-1">
+                                <small class="text-muted" id="char-counter">0 / 3000</small>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="send-btn" data-loading="Sending...">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Working relationship: {{ relationship_context }}
+                            {% if has_screenshot %}
+                            | <i class="fas fa-image me-1"></i>Screenshot uploaded
+                            {% endif %}
+                            {% if form_text %}
+                            | <i class="fas fa-file-text me-1"></i>Form text provided
+                            {% endif %}
+                        </small>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-success btn-sm" id="generate-final-btn" data-loading="Generating...">
+                                <i class="fas fa-magic me-1"></i>Generate Final Feedback
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="copy-chat-btn">
+                                <i class="fas fa-copy me-1"></i>Copy All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mt-3 justify-content-center">
+    <div class="col-md-10">
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="mb-3">
+                    <i class="fas fa-magic me-2"></i>Quick Actions
+                </h6>
+                <div class="row">
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-outline-primary btn-sm w-100 quick-action" 
+                                data-message="Give me a broad overview - what are their main strengths and areas for improvement?">
+                            <i class="fas fa-binoculars me-1"></i>Broad Overview
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-outline-primary btn-sm w-100 quick-action" 
+                                data-message="Can you give me a specific example of that behavior?">
+                            <i class="fas fa-search me-1"></i>Specific Example
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="button" class="btn btn-outline-primary btn-sm w-100 quick-action" 
+                                data-message="Tell me about a recent project or meeting you had together">
+                            <i class="fas fa-project-diagram me-1"></i>Recent Project
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Chat styling */
+#chat-messages {
+    scroll-behavior: smooth;
+}
+
+.message {
+    margin-bottom: 1rem;
+    max-width: 85%;
+}
+
+.user-message {
+    margin-left: auto;
+}
+
+.user-message .message-content {
+    background-color: #0d6efd;
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem 1rem 0.25rem 1rem;
+}
+
+.ai-message .message-content {
+    background-color: white;
+    border: 1px solid #dee2e6;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem 1rem 1rem 0.25rem;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+}
+
+.quick-action {
+    transition: all 0.2s ease;
+}
+
+.quick-action:hover {
+    transform: translateY(-1px);
+}
+
+/* Loading indicator */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 1rem;
+    max-width: 85%;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #6c757d;
+    animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+    0%, 80%, 100% { 
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    40% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+    const copyChatBtn = document.getElementById('copy-chat-btn');
+    const generateFinalBtn = document.getElementById('generate-final-btn');
+    
+    let isWaitingForResponse = false;
+    
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function addMessage(content, isUser = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+        
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        messageDiv.innerHTML = `
+            <div class="message-content">
+                ${isUser ? content : marked.parse(content)}
+            </div>
+            <div class="message-time ${isUser ? 'text-end' : ''}">
+                ${timeStr}
+            </div>
+        `;
+        
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+    
+    function showTypingIndicator() {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'message ai-message typing-indicator-message';
+        typingDiv.innerHTML = `
+            <div class="typing-indicator">
+                <i class="fas fa-robot me-2"></i>
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        `;
+        
+        chatMessages.appendChild(typingDiv);
+        scrollToBottom();
+        return typingDiv;
+    }
+    
+    function removeTypingIndicator() {
+        const typingIndicator = chatMessages.querySelector('.typing-indicator-message');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
+    }
+    
+    let chatHistory = []; // Store chat history locally
+    
+    function sendMessage(message, action = 'chat') {
+        if (isWaitingForResponse || (!message && action !== 'start')) return;
+        
+        isWaitingForResponse = true;
+        sendBtn.disabled = true;
+        
+        // Add user message if not the initial start
+        if (action !== 'start') {
+            addMessage(message, true);
+            chatInput.value = '';
+            // Reset textarea height
+            chatInput.style.height = 'auto';
+            chatInput.style.height = '38px';
+            // Add to local chat history
+            chatHistory.push({
+                role: 'user',
+                content: message
+            });
+        }
+        
+        // Show typing indicator
+        const typingIndicator = showTypingIndicator();
+        
+        // Send to backend with chat history
+        fetch('/api/single-player-chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: message,
+                action: action,
+                chat_history: chatHistory
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            removeTypingIndicator();
+            
+            if (data.error) {
+                addMessage('Sorry, I encountered an error. Please try again.', false);
+            } else {
+                addMessage(data.response, false);
+                // Add AI response to local chat history
+                chatHistory.push({
+                    role: 'assistant',
+                    content: data.response
+                });
+                
+                // Keep only last 20 messages to prevent bloat
+                if (chatHistory.length > 20) {
+                    chatHistory = chatHistory.slice(-20);
+                }
+            }
+        })
+        .catch(error => {
+            removeTypingIndicator();
+            console.error('Error:', error);
+            addMessage('Sorry, I encountered an error. Please try again.', false);
+        })
+        .finally(() => {
+            isWaitingForResponse = false;
+            sendBtn.disabled = false;
+            chatInput.focus();
+        });
+    }
+    
+    // Send button click
+    sendBtn.addEventListener('click', function() {
+        const message = chatInput.value.trim();
+        if (message) {
+            sendMessage(message);
+        }
+    });
+    
+    // Auto-resize textarea as user types and update character counter
+    const charCounter = document.getElementById('char-counter');
+    
+    chatInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+        
+        // Update character counter
+        const currentLength = this.value.length;
+        charCounter.textContent = `${currentLength} / 3000`;
+        
+        // Change color when getting close to limit
+        if (currentLength > 2700) {
+            charCounter.classList.add('text-warning');
+            charCounter.classList.remove('text-muted');
+        } else if (currentLength > 2900) {
+            charCounter.classList.add('text-danger');
+            charCounter.classList.remove('text-warning', 'text-muted');
+        } else {
+            charCounter.classList.add('text-muted');
+            charCounter.classList.remove('text-warning', 'text-danger');
+        }
+    });
+    
+    // Enter key to send (Ctrl+Enter for new line)
+    chatInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey) {
+            e.preventDefault();
+            const message = this.value.trim();
+            if (message) {
+                sendMessage(message);
+            }
+        }
+    });
+    
+    // Quick actions
+    document.querySelectorAll('.quick-action').forEach(button => {
+        button.addEventListener('click', function() {
+            const message = this.getAttribute('data-message');
+            sendMessage(message);
+        });
+    });
+    
+    // Copy all chat
+    copyChatBtn.addEventListener('click', function() {
+        const messages = chatMessages.querySelectorAll('.message');
+        let chatText = '';
+        
+        messages.forEach(msg => {
+            const content = msg.querySelector('.message-content');
+            const time = msg.querySelector('.message-time');
+            const isUser = msg.classList.contains('user-message');
+            
+            if (content && !msg.classList.contains('typing-indicator-message')) {
+                chatText += `${isUser ? 'You' : 'AI Assistant'}: ${content.textContent || content.innerText}\n\n`;
+            }
+        });
+        
+        navigator.clipboard.writeText(chatText).then(() => {
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-check me-1"></i>Copied!';
+            setTimeout(() => {
+                this.innerHTML = originalText;
+            }, 2000);
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+            alert('Could not copy to clipboard. Please select and copy the text manually.');
+        });
+    });
+    
+    // Generate Final Feedback button
+    generateFinalBtn.addEventListener('click', function() {
+        const message = "I'm ready to organize my feedback into final responses for the form.";
+        sendMessage(message);
+    });
+    
+    // Render initial guidance with markdown
+    const initialGuidanceEl = document.getElementById('initial-guidance');
+    const initialGuidanceText = `{{ initial_guidance|replace("'", "\\'")|replace('"', '\\"')|replace("\n", "\\n") }}`;
+    
+    if (typeof marked !== 'undefined') {
+        initialGuidanceEl.innerHTML = marked.parse(initialGuidanceText);
+    } else {
+        initialGuidanceEl.textContent = initialGuidanceText;
+    }
+    
+    // Add initial guidance to chat history for context
+    chatHistory.push({
+        role: 'assistant',
+        content: initialGuidanceText
+    });
+    
+    // Focus on input
+    chatInput.focus();
+});
+</script>
+{% endblock %}

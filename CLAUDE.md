@@ -170,3 +170,9 @@ candidly/
 - **Content Preservation**: Organization over summarization to keep all details
 - **Context Awareness**: AI references previous responses for cohesive conversations
 - **Customizable Prompts**: Users can edit instructions for personalized organization
+
+### UI/UX Guidelines
+- When users click on buttons, always perform some sort of state change to indicate that something has happened.
+
+## Development Workflow Memories
+- When starting the dev server always run it in the background.

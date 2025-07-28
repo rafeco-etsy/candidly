@@ -89,8 +89,13 @@
 
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                             <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-md-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save me-2"></i>Create Request
+                            <button type="submit" class="btn btn-primary" id="create-btn">
+                                <span id="create-btn-content">
+                                    <i class="fas fa-save me-2"></i>Create Request
+                                </span>
+                                <span id="create-btn-loading" class="d-none">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>Creating...
+                                </span>
                             </button>
                         </div>
                     </form>
@@ -239,6 +244,32 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup autocomplete for both email fields
     setupEmailAutocomplete('target_email', 'target_email_suggestions');
     setupEmailAutocomplete('assigned_to_email', 'assigned_to_email_suggestions');
+    
+    // Handle form submission loading state
+    const form = document.querySelector('form');
+    const createBtn = document.getElementById('create-btn');
+    
+    if (form && createBtn) {
+        const createBtnContent = document.getElementById('create-btn-content');
+        const createBtnLoading = document.getElementById('create-btn-loading');
+        
+        form.addEventListener('submit', function(e) {
+            // Basic validation
+            const targetEmail = document.getElementById('target_email').value.trim();
+            const targetName = document.getElementById('target_name').value.trim();
+            const assignedToEmail = document.getElementById('assigned_to_email').value.trim();
+            const templateId = document.getElementById('template_id').value;
+            
+            if (!targetEmail || !targetName || !assignedToEmail || !templateId) {
+                return; // Let browser validation handle this
+            }
+            
+            // Show loading state
+            createBtnContent.classList.add('d-none');
+            createBtnLoading.classList.remove('d-none');
+            createBtn.disabled = true;
+        });
+    }
 });
 </script>
 {% endblock %}

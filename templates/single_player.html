@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback Assistant - Candidly{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-user me-2"></i>AI Feedback Assistant
+                </h4>
+                <small>Get help completing feedback forms from other HRIS tools</small>
+            </div>
+            <div class="card-body">
+                <p class="lead">
+                    Upload a screenshot or paste text from an external feedback form, and our AI will help you craft thoughtful, specific responses.
+                </p>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>How it works:</strong> Describe your working relationship, share the feedback form, and our AI will interview you to help create polished responses you can copy back to the original form.
+                </div>
+
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="relationship_context" class="form-label">Working Relationship</label>
+                        <textarea class="form-control" id="relationship_context" name="relationship_context" rows="3" required
+                                  placeholder="Describe how you work with this person. For example: 'John is my direct manager who I report to weekly. He leads our product team and I'm a software engineer.' or 'Sarah is a product manager I collaborate with on multiple projects. We work together on requirements and planning.'"></textarea>
+                        <div class="form-text">
+                            Help the AI understand your working relationship and context to ask better questions.
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Feedback Form Content</label>
+                        
+                        <!-- Screenshot Upload Option -->
+                        <div class="mb-3">
+                            <label for="form_screenshot" class="form-label">
+                                <i class="fas fa-camera me-2"></i>Upload Screenshot
+                            </label>
+                            <div id="drop-zone" class="border border-2 border-dashed rounded p-4 text-center position-relative" 
+                                 style="border-color: #dee2e6 !important; transition: all 0.3s ease;">
+                                <div id="drop-content">
+                                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                    <p class="mb-2">Drag and drop an image here, or <strong>click to browse</strong></p>
+                                    <small class="text-muted">Supports: JPG, PNG, GIF, WebP</small>
+                                </div>
+                                <div id="file-preview" class="d-none">
+                                    <i class="fas fa-image fa-2x text-success mb-2"></i>
+                                    <p class="mb-0" id="file-name"></p>
+                                    <small class="text-muted" id="file-size"></small>
+                                    <button type="button" class="btn btn-sm btn-outline-danger mt-2" id="remove-file">
+                                        <i class="fas fa-times me-1"></i>Remove
+                                    </button>
+                                </div>
+                                <input type="file" class="position-absolute w-100 h-100 opacity-0" 
+                                       id="form_screenshot" name="form_screenshot" accept="image/*" 
+                                       style="top: 0; left: 0; cursor: pointer;">
+                            </div>
+                            <div class="form-text">
+                                Upload a screenshot of the feedback form you need to complete.
+                            </div>
+                        </div>
+
+                        <div class="text-center my-3">
+                            <span class="badge bg-secondary">OR</span>
+                        </div>
+
+                        <!-- Text Input Option -->
+                        <div class="mb-3">
+                            <label for="form_text" class="form-label">
+                                <i class="fas fa-paste me-2"></i>Paste Form Text
+                            </label>
+                            <textarea class="form-control" id="form_text" name="form_text" rows="6"
+                                      placeholder="Paste the text content of the feedback form here. Include the questions you need to answer.
+
+Example:
+1. How effectively does this person communicate with team members?
+2. What are their key strengths in their current role?
+3. What areas would you recommend for their professional development?
+4. How well do they handle challenging situations or conflicts?"></textarea>
+                            <div class="form-text">
+                                Copy and paste the feedback questions from the external form.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-comments fa-2x text-primary mb-2"></i>
+                                    <h6>AI Interview</h6>
+                                    <small class="text-muted">Get specific examples through guided questions</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-copy fa-2x text-success mb-2"></i>
+                                    <h6>Polished Output</h6>
+                                    <small class="text-muted">Copy professional responses back to your form</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary me-md-2">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn btn-success" id="submit-btn">
+                            <span id="submit-btn-content">
+                                <i class="fas fa-rocket me-2"></i>Start AI Session
+                            </span>
+                            <span id="submit-btn-loading" class="d-none">
+                                <i class="fas fa-spinner fa-spin me-2"></i>Analyzing Form...
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Information Cards -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <i class="fas fa-brain fa-2x text-primary mb-3"></i>
+                <h6>Smart Questions</h6>
+                <p class="text-muted small">AI asks follow-up questions to help you think of specific examples and impacts</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-warning">
+            <div class="card-body text-center">
+                <i class="fas fa-balance-scale fa-2x text-warning mb-3"></i>
+                <h6>Balanced Feedback</h6>
+                <p class="text-muted small">Helps you provide constructive criticism while highlighting strengths</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <i class="fas fa-magic fa-2x text-success mb-3"></i>
+                <h6>Professional Polish</h6>
+                <p class="text-muted small">Transforms your thoughts into well-structured, actionable feedback</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const screenshotInput = document.getElementById('form_screenshot');
+    const textInput = document.getElementById('form_text');
+    const dropZone = document.getElementById('drop-zone');
+    const dropContent = document.getElementById('drop-content');
+    const filePreview = document.getElementById('file-preview');
+    const fileName = document.getElementById('file-name');
+    const fileSize = document.getElementById('file-size');
+    const removeFileBtn = document.getElementById('remove-file');
+    
+    // Format file size
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // Show file preview
+    function showFilePreview(file) {
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        dropContent.classList.add('d-none');
+        filePreview.classList.remove('d-none');
+        dropZone.style.borderColor = '#198754';
+        dropZone.style.backgroundColor = '#f8fff9';
+    }
+    
+    // Hide file preview
+    function hideFilePreview() {
+        dropContent.classList.remove('d-none');
+        filePreview.classList.add('d-none');
+        dropZone.style.borderColor = '#dee2e6';
+        dropZone.style.backgroundColor = '';
+    }
+    
+    // Validate file type
+    function isValidImageFile(file) {
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        return validTypes.includes(file.type);
+    }
+    
+    // Handle file selection (both click and drop)
+    function handleFileSelection(file) {
+        if (!isValidImageFile(file)) {
+            alert('Please select a valid image file (JPG, PNG, GIF, or WebP).');
+            return;
+        }
+        
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+            alert('File size must be less than 10MB.');
+            return;
+        }
+        
+        showFilePreview(file);
+        textInput.value = ''; // Clear text input when image is selected
+    }
+    
+    // File input change event
+    screenshotInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            handleFileSelection(this.files[0]);
+        } else {
+            hideFilePreview();
+        }
+    });
+    
+    // Text input change event
+    textInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+            screenshotInput.value = '';
+            hideFilePreview();
+        }
+    });
+    
+    // Remove file button
+    removeFileBtn.addEventListener('click', function() {
+        screenshotInput.value = '';
+        hideFilePreview();
+    });
+    
+    // Drag and drop events
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.style.borderColor = '#0d6efd';
+        this.style.backgroundColor = '#f0f8ff';
+    });
+    
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Only reset if we're leaving the drop zone entirely
+        if (!this.contains(e.relatedTarget)) {
+            if (!screenshotInput.files.length) {
+                this.style.borderColor = '#dee2e6';
+                this.style.backgroundColor = '';
+            } else {
+                this.style.borderColor = '#198754';
+                this.style.backgroundColor = '#f8fff9';
+            }
+        }
+    });
+    
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            
+            // Create a new FileList-like object and assign to input
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            screenshotInput.files = dataTransfer.files;
+            
+            handleFileSelection(file);
+        }
+    });
+    
+    // Prevent default drag behaviors on the document
+    document.addEventListener('dragover', function(e) {
+        e.preventDefault();
+    });
+    
+    document.addEventListener('drop', function(e) {
+        e.preventDefault();
+    });
+    
+    // Handle form submission loading state
+    const form = document.querySelector('form');
+    const submitBtn = document.getElementById('submit-btn');
+    const submitBtnContent = document.getElementById('submit-btn-content');
+    const submitBtnLoading = document.getElementById('submit-btn-loading');
+    
+    form.addEventListener('submit', function(e) {
+        // Show loading state
+        submitBtnContent.classList.add('d-none');
+        submitBtnLoading.classList.remove('d-none');
+        submitBtn.disabled = true;
+        
+        // Optional: Add form validation feedback here
+        const relationshipContext = document.getElementById('relationship_context').value.trim();
+        const formText = document.getElementById('form_text').value.trim();
+        const formScreenshot = document.getElementById('form_screenshot').files.length > 0;
+        
+        if (!relationshipContext) {
+            e.preventDefault();
+            submitBtnContent.classList.remove('d-none');
+            submitBtnLoading.classList.add('d-none');
+            submitBtn.disabled = false;
+            alert('Please describe your working relationship.');
+            return;
+        }
+        
+        if (!formText && !formScreenshot) {
+            e.preventDefault();
+            submitBtnContent.classList.remove('d-none');
+            submitBtnLoading.classList.add('d-none');
+            submitBtn.disabled = false;
+            alert('Please provide either form text or upload a screenshot.');
+            return;
+        }
+        
+        // If we get here, form is valid and will submit
+        // The loading state will persist until the page redirects
+    });
+});
+</script>
+{% endblock %}

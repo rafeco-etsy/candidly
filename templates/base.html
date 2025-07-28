@@ -35,6 +35,11 @@
                             <i class="fas fa-plus me-1"></i>New Request
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('single_player_mode') }}">
+                            <i class="fas fa-robot me-1"></i>AI Assistant
+                        </a>
+                    </li>
                     {% endif %}
                 </ul>
                 
@@ -108,6 +113,86 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Global loading states for buttons and links -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add loading states to buttons with data-loading attribute
+        document.querySelectorAll('[data-loading]').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                // Don't add loading state if it's a link with target="_blank" or external link
+                if (button.tagName === 'A' && (button.target === '_blank' || button.href.startsWith('http') && !button.href.includes(window.location.hostname))) {
+                    return;
+                }
+                
+                const originalText = button.innerHTML;
+                const loadingText = button.getAttribute('data-loading');
+                
+                button.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>${loadingText}`;
+                button.disabled = true;
+                
+                // For forms, don't restore state as page will redirect
+                // For other actions, restore after a delay as fallback
+                if (button.type !== 'submit') {
+                    setTimeout(() => {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 5000);
+                }
+            });
+        });
+        
+        // Add visual feedback for all form submissions
+        document.querySelectorAll('form').forEach(function(form) {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn && !submitBtn.disabled) {
+                    // Add a subtle loading class to the form
+                    form.classList.add('form-submitting');
+                    
+                    // Add loading state if not already handled
+                    if (!submitBtn.querySelector('.fa-spinner')) {
+                        const icon = submitBtn.querySelector('i');
+                        if (icon && icon.classList.contains('fas')) {
+                            icon.className = 'fas fa-spinner fa-spin me-2';
+                        }
+                    }
+                }
+            });
+        });
+    });
+    </script>
+    
+    <style>
+    .form-submitting {
+        opacity: 0.8;
+        pointer-events: none;
+    }
+    
+    .btn:disabled {
+        cursor: not-allowed;
+    }
+    
+    /* Subtle loading animation for the whole page when navigating */
+    body.navigating {
+        cursor: progress;
+    }
+    
+    /* Add hover effects for better button feedback */
+    .btn {
+        transition: all 0.15s ease-in-out;
+    }
+    
+    .btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .btn:active:not(:disabled) {
+        transform: translateY(0);
+    }
+    </style>
+    
     {% block scripts %}{% endblock %}
 </body>
 </html>

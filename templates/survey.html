@@ -103,7 +103,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <small class="text-muted">I'll ask follow-up questions to help you provide detailed feedback.</small>
                                     <button class="btn btn-primary send-message" type="button" 
-                                            data-question-id="{{ question.id }}">
+                                            data-question-id="{{ question.id }}" data-loading="Sending...">
                                         <i class="fas fa-paper-plane me-1"></i>Send
                                     </button>
                                 </div>
@@ -113,7 +113,7 @@
                     {% endfor %}
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                        <button type="button" class="btn btn-success btn-lg" id="review-responses">
+                        <button type="button" class="btn btn-success btn-lg" id="review-responses" data-loading="Saving Responses...">
                             <i class="fas fa-eye me-2"></i>Review My Responses
                         </button>
                     </div>

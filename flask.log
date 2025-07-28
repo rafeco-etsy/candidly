@@ -6,150 +6,291 @@
  * Restarting with stat
  * Debugger is active!
  * Debugger PIN: 111-750-248
-127.0.0.1 - - [25/Jul/2025 07:38:16] "GET /dashboard HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 07:38:34] "GET /templates HTTP/1.1" 200 -
- * Detected change in '/Users/rcolburn/candidly/tests/test_models.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_models.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/conftest.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/conftest.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_models.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_models.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_models.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_models.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_models.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_routes.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_routes.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_routes.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_routes.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_routes.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_routes.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_routes.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_models.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_models.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_models.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_models.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_integration.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_integration.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_integration.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_integration.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_integration.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_integration.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
- * Detected change in '/Users/rcolburn/candidly/tests/test_integration.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 111-750-248
-127.0.0.1 - - [25/Jul/2025 07:58:40] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 07:58:53] "GET /templates HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 07:58:55] "GET /templates/create HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 07:59:30] "[32mPOST /templates/create HTTP/1.1[0m" 302 -
-127.0.0.1 - - [25/Jul/2025 07:59:30] "GET /templates HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 07:59:33] "GET /create?template=131d3a81-a036-4df6-8c41-3f448ec48e43 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 07:59:41] "[32mPOST /create?template=131d3a81-a036-4df6-8c41-3f448ec48e43 HTTP/1.1[0m" 302 -
-127.0.0.1 - - [25/Jul/2025 07:59:41] "GET /share/82d9b100-109a-4a64-a22e-f8d1481a12bb HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 07:59:44] "GET /survey/82d9b100-109a-4a64-a22e-f8d1481a12bb HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 07:59:57] "POST /api/chat/e6b28b94-f624-4adb-a1df-bddb856736a6 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:00:07] "POST /api/chat/e6b28b94-f624-4adb-a1df-bddb856736a6 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:00:16] "POST /api/chat/e6b28b94-f624-4adb-a1df-bddb856736a6 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:00:39] "POST /api/chat/e6b28b94-f624-4adb-a1df-bddb856736a6 HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:00:42] "POST /review/82d9b100-109a-4a64-a22e-f8d1481a12bb HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:00:42] "GET /review/82d9b100-109a-4a64-a22e-f8d1481a12bb HTTP/1.1" 200 -
-/Users/rcolburn/candidly/app.py:191: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+127.0.0.1 - - [27/Jul/2025 09:25:38] "GET /create?template=12c85786-aa53-4aaf-84dc-5fba4bffc2d7 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:25:38] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 09:25:47] "[32mPOST /create?template=12c85786-aa53-4aaf-84dc-5fba4bffc2d7 HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 09:25:47] "GET /share/8afad124-6777-4efb-8f1d-5ae85f6a3937 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:25:57] "GET /survey/8afad124-6777-4efb-8f1d-5ae85f6a3937 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:27:37] "POST /api/chat/88f6f6ce-e50e-4974-ab7f-c916e459de60 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:30:03] "POST /api/chat/88f6f6ce-e50e-4974-ab7f-c916e459de60 HTTP/1.1" 200 -
+/Users/rcolburn/candidly/app.py:595: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  question_obj = Question.query.get(question_id)
+/Users/rcolburn/candidly/app.py:596: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  template_obj = FeedbackTemplate.query.get(question_obj.template_id)
+127.0.0.1 - - [27/Jul/2025 09:30:06] "POST /review/8afad124-6777-4efb-8f1d-5ae85f6a3937 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:30:06] "GET /review/8afad124-6777-4efb-8f1d-5ae85f6a3937 HTTP/1.1" 200 -
+/Users/rcolburn/candidly/app.py:644: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
   response.submitted_at = datetime.utcnow()
-127.0.0.1 - - [25/Jul/2025 08:00:47] "[32mPOST /submit/82d9b100-109a-4a64-a22e-f8d1481a12bb HTTP/1.1[0m" 302 -
-127.0.0.1 - - [25/Jul/2025 08:00:47] "GET /thank-you HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:00:49] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:13:43] "GET /dashboard HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:13:48] "GET /report/82d9b100-109a-4a64-a22e-f8d1481a12bb HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:14:51] "[35m[1mGET /dashboard HTTP/1.1[0m" 500 -
-Traceback (most recent call last):
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
-    self.dialect.do_execute(
-    ^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
-    cursor.execute(statement, parameters)
-    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-sqlite3.OperationalError: no such table: feedback_request
-
-The above exception was the direct cause of the following exception:
-
+127.0.0.1 - - [27/Jul/2025 09:30:15] "[32mPOST /submit/8afad124-6777-4efb-8f1d-5ae85f6a3937 HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 09:30:15] "GET /thank-you HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:30:17] "GET / HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 09:34:54] "GET /create HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:35:01] "[32mPOST /create HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 09:35:01] "GET /share/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:35:08] "GET /survey/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:36:26] "POST /api/chat/88f6f6ce-e50e-4974-ab7f-c916e459de60 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:37:26] "POST /api/chat/88f6f6ce-e50e-4974-ab7f-c916e459de60 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:37:44] "POST /api/chat/88f6f6ce-e50e-4974-ab7f-c916e459de60 HTTP/1.1" 200 -
+/Users/rcolburn/candidly/app.py:595: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  question_obj = Question.query.get(question_id)
+/Users/rcolburn/candidly/app.py:596: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  template_obj = FeedbackTemplate.query.get(question_obj.template_id)
+127.0.0.1 - - [27/Jul/2025 09:37:48] "POST /review/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:37:48] "GET /review/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+/Users/rcolburn/candidly/app.py:644: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  response.submitted_at = datetime.utcnow()
+127.0.0.1 - - [27/Jul/2025 09:38:35] "[32mPOST /submit/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 09:38:35] "GET /thank-you HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:38:37] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:38:41] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:38:46] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 09:39:27] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 09:41:08] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:41:08] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 09:53:38] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:53:39] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 09:53:53] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:53:53] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 09:54:01] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:54:01] "GET /static/favicon.svg HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:55:47] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:55:47] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 09:55:48] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:55:48] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 09:56:41] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 09:56:41] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 09:56:56] "POST /api/regenerate-summary/ef5454fc-01a0-43c0-8b7c-c12579af210d HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 10:01:48] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:01:48] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 10:01:53] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:01:53] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 10:01:56] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:01:56] "GET /static/favicon.svg HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:03:14] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:03:14] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 10:03:16] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:03:18] "GET /api/get-prompt/ef5454fc-01a0-43c0-8b7c-c12579af210d HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:04:04] "POST /api/regenerate-summary/ef5454fc-01a0-43c0-8b7c-c12579af210d HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:04:18] "GET /api/get-prompt/ef5454fc-01a0-43c0-8b7c-c12579af210d HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:04:37] "POST /api/regenerate-summary/ef5454fc-01a0-43c0-8b7c-c12579af210d HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:07:49] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:07:49] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 10:18:00] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:18:02] "GET /report/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+/Users/rcolburn/candidly/app.py:21: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  question = Question.query.get(response.question_id)
+127.0.0.1 - - [27/Jul/2025 10:18:19] "GET /coaching/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:18:22] "GET /coaching/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:18:24] "GET /coaching/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:18:24] "GET /coaching/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:18:27] "GET /coaching/8afad124-6777-4efb-8f1d-5ae85f6a3937 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:19:37] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:19:37] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 10:19:48] "GET /coaching/2dc1ca7a-e4bf-4cd0-8369-8d5d43e16760 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:20:35] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:20:39] "GET /create HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/models.py', reloading
+Error analyzing feedback safety: Expecting value: line 1 column 1 (char 0)
+Error analyzing feedback safety: Expecting value: line 1 column 1 (char 0)
+Error analyzing feedback safety: Expecting value: line 1 column 1 (char 0)
+Error analyzing feedback safety: Expecting value: line 1 column 1 (char 0)
+Error analyzing feedback safety: Expecting value: line 1 column 1 (char 0)
+Error analyzing feedback safety: Expecting value: line 1 column 1 (char 0)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/migrations/env.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 10:26:03] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:27:18] "GET /create HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:27:24] "GET /templates/create HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:28:50] "[32mPOST /templates/create HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 10:28:50] "GET /templates HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:28:55] "GET /create?template=1b2fe2bb-4bed-4e64-bb2b-fbb83417bc55 HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 10:32:29] "GET /create?template=1b2fe2bb-4bed-4e64-bb2b-fbb83417bc55 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:32:29] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+ * Detected change in '/Users/rcolburn/candidly/models.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/models.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/migrations/versions/4ad3997fbc70_add_reviewer_id_field_to_feedbackrequest.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/migrations/versions/4ad3997fbc70_add_reviewer_id_field_to_feedbackrequest.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 10:36:03] "GET /create?template=1b2fe2bb-4bed-4e64-bb2b-fbb83417bc55 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:36:03] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 10:36:05] "GET /create?template=1b2fe2bb-4bed-4e64-bb2b-fbb83417bc55 HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:36:05] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 10:36:07] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:36:08] "GET /create HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:36:29] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:36:31] "GET /create HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:37:56] "GET /create HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 10:37:56] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+ * Detected change in '/Users/rcolburn/candidly/models.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/models.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/migrations/versions/8609dcede7bd_add_email_first_approach_for_target_and_.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/migrations/versions/8609dcede7bd_add_email_first_approach_for_target_and_.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/migrations/versions/8609dcede7bd_add_email_first_approach_for_target_and_.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/auth.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 15:06:43] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:06:45] "GET /create HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:06:53] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:06:55] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:06:55] "GET /templates HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:06:56] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:06:57] "GET /templates HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 15:13:25] "GET /templates HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:13:26] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 15:13:27] "GET /templates HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:13:27] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 15:13:28] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:13:31] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:13:36] "GET /create HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 15:22:28] "GET /create HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:22:28] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 15:22:30] "GET /api/email-suggestions?q=dev HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:25:08] "GET /create HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:25:08] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 15:25:11] "GET /api/email-suggestions?q=dev HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 15:38:35] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:38:42] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:38:42] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 15:38:43] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:38:43] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 15:38:47] "[35m[1mGET /dashboard HTTP/1.1[0m" 500 -
 Traceback (most recent call last):
   File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 2213, in __call__
     return self.wsgi_app(environ, start_response)
@@ -165,67 +306,48 @@ Traceback (most recent call last):
   File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 1469, in dispatch_request
     return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/rcolburn/candidly/app.py", line 204, in dashboard
-    feedback_requests = FeedbackRequest.query.order_by(FeedbackRequest.created_at.desc()).all()
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/query.py", line 2704, in all
-    return self._iter().all()  # type: ignore
-           ~~~~~~~~~~^^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/query.py", line 2857, in _iter
-    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/rcolburn/candidly/app.py", line 821, in dashboard
+    return render_template('dashboard.html', role_data=role_data, user=user)
+  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/templating.py", line 151, in render_template
+    return _render(app, template, context)
+  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/templating.py", line 132, in _render
+    rv = template.render(context)
+  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/jinja2/environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/jinja2/environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "/Users/rcolburn/candidly/templates/dashboard.html", line 1, in top-level template code
+    {% extends "base.html" %}
+  File "/Users/rcolburn/candidly/templates/base.html", line 106, in top-level template code
+    {% block content %}{% endblock %}
+    ^^^^^^^^^^^^^^^^^
+  File "/Users/rcolburn/candidly/templates/dashboard.html", line 11, in block 'content'
+    <a href="{{ url_for('single_player') }}" class="btn btn-outline-success me-2">
+    ^^^^^^^^^
+  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 1697, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 1686, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
     
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
-    return self._execute_internal(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
-    result: Result[Any] = compile_state_cls.orm_execute_statement(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
-    result = conn.execute(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1415, in execute
-    return meth(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
-    return connection._execute_clauseelement(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1637, in _execute_clauseelement
-    ret = self._execute_context(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1842, in _execute_context
-    return self._exec_single_context(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1982, in _exec_single_context
-    self._handle_dbapi_exception(
-    ^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2351, in _handle_dbapi_exception
-    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
-    self.dialect.do_execute(
-    ^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
-    cursor.execute(statement, parameters)
-    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: feedback_request
-[SQL: SELECT feedback_request.id AS feedback_request_id, feedback_request.target_name AS feedback_request_target_name, feedback_request.template_id AS feedback_request_template_id, feedback_request.created_at AS feedback_request_created_at 
-FROM feedback_request ORDER BY feedback_request.created_at DESC]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-127.0.0.1 - - [25/Jul/2025 08:14:51] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
-127.0.0.1 - - [25/Jul/2025 08:14:51] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
-127.0.0.1 - - [25/Jul/2025 08:14:51] "GET /dashboard?__debugger__=yes&cmd=resource&f=console.png&s=5rIHpUI3vf98iIB7tjKT HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:14:51] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
-127.0.0.1 - - [25/Jul/2025 08:15:47] "GET /dashboard HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:16:34] "[35m[1mGET /create HTTP/1.1[0m" 500 -
-Traceback (most recent call last):
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
-    self.dialect.do_execute(
-    ^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
-    cursor.execute(statement, parameters)
-    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-sqlite3.OperationalError: no such table: feedback_template
-
-The above exception was the direct cause of the following exception:
-
+  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/werkzeug/routing/map.py", line 950, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'single_player'. Did you mean 'single_player_mode' instead?
+127.0.0.1 - - [27/Jul/2025 15:38:47] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 15:38:47] "GET /dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:38:48] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 15:38:48] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 15:39:47] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:39:47] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 15:39:50] "GET /dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:39:54] "GET /single-player HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:45:59] "GET /single-player HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:45:59] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [27/Jul/2025 15:47:26] "[35m[1mPOST /single-player HTTP/1.1[0m" 500 -
 Traceback (most recent call last):
   File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 2213, in __call__
     return self.wsgi_app(environ, start_response)
@@ -241,201 +363,228 @@ Traceback (most recent call last):
   File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 1469, in dispatch_request
     return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/rcolburn/candidly/app.py", line 80, in create_request
-    templates = FeedbackTemplate.query.order_by(FeedbackTemplate.name).all()
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/query.py", line 2704, in all
-    return self._iter().all()  # type: ignore
-           ~~~~~~~~~~^^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/query.py", line 2857, in _iter
-    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
-    return self._execute_internal(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
-    result: Result[Any] = compile_state_cls.orm_execute_statement(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
-    result = conn.execute(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1415, in execute
-    return meth(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
-    return connection._execute_clauseelement(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1637, in _execute_clauseelement
-    ret = self._execute_context(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1842, in _execute_context
-    return self._exec_single_context(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1982, in _exec_single_context
-    self._handle_dbapi_exception(
-    ^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2351, in _handle_dbapi_exception
-    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
-    self.dialect.do_execute(
-    ^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
-    cursor.execute(statement, parameters)
-    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: feedback_template
-[SQL: SELECT feedback_template.id AS feedback_template_id, feedback_template.name AS feedback_template_name, feedback_template.description AS feedback_template_description, feedback_template.created_at AS feedback_template_created_at 
-FROM feedback_template ORDER BY feedback_template.name]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-127.0.0.1 - - [25/Jul/2025 08:16:34] "GET /create?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:16:34] "GET /create?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:16:34] "GET /create?__debugger__=yes&cmd=resource&f=console.png&s=5rIHpUI3vf98iIB7tjKT HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:16:34] "GET /create?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
-127.0.0.1 - - [25/Jul/2025 08:18:01] "[35m[1mGET /create HTTP/1.1[0m" 500 -
-Traceback (most recent call last):
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
-    self.dialect.do_execute(
-    ^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
-    cursor.execute(statement, parameters)
-    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-sqlite3.OperationalError: no such table: feedback_template
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 2213, in __call__
-    return self.wsgi_app(environ, start_response)
-           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 2193, in wsgi_app
-    response = self.handle_exception(e)
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 2190, in wsgi_app
-    response = self.full_dispatch_request()
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 1486, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 1484, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 1469, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/rcolburn/candidly/app.py", line 80, in create_request
-    templates = FeedbackTemplate.query.order_by(FeedbackTemplate.name).all()
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/query.py", line 2704, in all
-    return self._iter().all()  # type: ignore
-           ~~~~~~~~~~^^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/query.py", line 2857, in _iter
-    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
-    return self._execute_internal(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
-    result: Result[Any] = compile_state_cls.orm_execute_statement(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
-    result = conn.execute(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1415, in execute
-    return meth(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
-    return connection._execute_clauseelement(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1637, in _execute_clauseelement
-    ret = self._execute_context(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1842, in _execute_context
-    return self._exec_single_context(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1982, in _exec_single_context
-    self._handle_dbapi_exception(
-    ^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2351, in _handle_dbapi_exception
-    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
-    self.dialect.do_execute(
-    ^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
-    cursor.execute(statement, parameters)
-    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: feedback_template
-[SQL: SELECT feedback_template.id AS feedback_template_id, feedback_template.name AS feedback_template_name, feedback_template.description AS feedback_template_description, feedback_template.created_at AS feedback_template_created_at 
-FROM feedback_template ORDER BY feedback_template.name]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-127.0.0.1 - - [25/Jul/2025 08:18:01] "[36mGET /create?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
-127.0.0.1 - - [25/Jul/2025 08:18:01] "[36mGET /create?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
-127.0.0.1 - - [25/Jul/2025 08:18:01] "[36mGET /create?__debugger__=yes&cmd=resource&f=console.png&s=5rIHpUI3vf98iIB7tjKT HTTP/1.1[0m" 304 -
-127.0.0.1 - - [25/Jul/2025 08:18:01] "[36mGET /create?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
-127.0.0.1 - - [25/Jul/2025 08:18:05] "[35m[1mGET /dashboard HTTP/1.1[0m" 500 -
-Traceback (most recent call last):
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
-    self.dialect.do_execute(
-    ^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
-    cursor.execute(statement, parameters)
-    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-sqlite3.OperationalError: no such table: feedback_request
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 2213, in __call__
-    return self.wsgi_app(environ, start_response)
-           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 2193, in wsgi_app
-    response = self.handle_exception(e)
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 2190, in wsgi_app
-    response = self.full_dispatch_request()
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 1486, in full_dispatch_request
-    rv = self.handle_user_exception(e)
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 1484, in full_dispatch_request
-    rv = self.dispatch_request()
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask/app.py", line 1469, in dispatch_request
-    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
-  File "/Users/rcolburn/candidly/app.py", line 204, in dashboard
-    feedback_requests = FeedbackRequest.query.order_by(FeedbackRequest.created_at.desc()).all()
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/query.py", line 2704, in all
-    return self._iter().all()  # type: ignore
-           ~~~~~~~~~~^^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/query.py", line 2857, in _iter
-    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
-    return self._execute_internal(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
-    result: Result[Any] = compile_state_cls.orm_execute_statement(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
-    result = conn.execute(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1415, in execute
-    return meth(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
-    return connection._execute_clauseelement(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1637, in _execute_clauseelement
-    ret = self._execute_context(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1842, in _execute_context
-    return self._exec_single_context(
-    
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1982, in _exec_single_context
-    self._handle_dbapi_exception(
-    ^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2351, in _handle_dbapi_exception
-    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
-    self.dialect.do_execute(
-    ^
-  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
-    cursor.execute(statement, parameters)
-    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
-sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: feedback_request
-[SQL: SELECT feedback_request.id AS feedback_request_id, feedback_request.target_name AS feedback_request_target_name, feedback_request.template_id AS feedback_request_template_id, feedback_request.created_at AS feedback_request_created_at 
-FROM feedback_request ORDER BY feedback_request.created_at DESC]
-(Background on this error at: https://sqlalche.me/e/20/e3q8)
-127.0.0.1 - - [25/Jul/2025 08:18:05] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
-127.0.0.1 - - [25/Jul/2025 08:18:05] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
-127.0.0.1 - - [25/Jul/2025 08:18:05] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=console.png&s=5rIHpUI3vf98iIB7tjKT HTTP/1.1[0m" 304 -
-127.0.0.1 - - [25/Jul/2025 08:18:05] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+  File "/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/flask_login/utils.py", line 290, in decorated_view
+    return current_app.ensure_sync(func)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/rcolburn/candidly/app.py", line 863, in single_player_mode
+    session['sp_session'] = session_data
+    ^^^^^^^
+NameError: name 'session' is not defined. Did you mean: 'Question'?
+127.0.0.1 - - [27/Jul/2025 15:47:26] "GET /single-player?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:47:26] "GET /single-player?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:47:26] "GET /single-player?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:47:26] "[36mGET /single-player?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 15:48:21] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 15:48:21] "GET /single-player/chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:48:52] "GET /single-player HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 15:51:55] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 15:51:55] "GET /single-player/chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:51:56] "GET /api/single-player-status HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:53:01] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 15:53:01] "GET /single-player/chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:53:01] "GET /api/single-player-status HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:53:05] "GET /single-player HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:53:24] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 15:53:24] "GET /single-player/chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:53:25] "GET /api/single-player-status HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 15:55:59] "GET /single-player HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:56:29] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 15:56:29] "GET /single-player/chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:56:30] "GET /api/single-player-status HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 15:58:06] "GET /single-player HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:58:06] "GET /single-player HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:58:06] "[36mGET /static/favicon.svg HTTP/1.1[0m" 304 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 15:58:59] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 15:58:59] "GET /single-player/chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:59:00] "GET /api/single-player-status HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:59:04] "POST /api/single-player-chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 15:59:34] "GET /single-player HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 16:01:13] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 16:01:13] "GET /single-player/chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:01:13] "GET /api/single-player-status HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:01:15] "POST /api/single-player-chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:01:27] "GET /single-player HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:01:31] "GET /api/single-player-status HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:01:34] "POST /api/single-player-chat HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 16:02:51] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 16:02:51] "GET /single-player/chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:02:51] "GET /api/single-player-status HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:02:54] "POST /api/single-player-chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:03:04] "GET /single-player HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 16:08:07] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 16:08:07] "GET /single-player HTTP/1.1" 200 -
+/Users/rcolburn/candidly/venv/lib/python3.13/site-packages/werkzeug/sansio/response.py:261: UserWarning: The 'session' cookie is too large: the value was 168947 bytes but the header required 26 extra bytes. The final size was 168973 bytes but the limit is 4093 bytes. Browsers may silently ignore cookies larger than this.
+  dump_cookie(
+127.0.0.1 - - [27/Jul/2025 16:08:29] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 16:08:29] "GET /single-player/chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:08:30] "GET /api/single-player-status HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:08:33] "POST /api/single-player-chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:08:56] "GET /single-player HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:09:31] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 16:09:31] "GET /single-player/chat HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:09:32] "GET /api/single-player-status HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:09:36] "POST /api/single-player-chat HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 16:12:08] "GET /single-player HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 16:15:10] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 16:15:10] "GET /single-player/results HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+Screenshot uploaded: Screenshot 2025-07-27 at 3.31.46 PM.png, size: 135767 bytes
+Generated feedback guidance: 1792 characters
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+127.0.0.1 - - [27/Jul/2025 16:17:13] "GET /single-player HTTP/1.1" 200 -
+127.0.0.1 - - [27/Jul/2025 16:17:31] "[32mPOST /single-player HTTP/1.1[0m" 302 -
+127.0.0.1 - - [27/Jul/2025 16:17:31] "GET /single-player/results HTTP/1.1" 200 -
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+Screenshot uploaded: Screenshot 2025-07-27 at 3.31.46 PM.png, size: 135767 bytes
+Generated feedback guidance: 1943 characters
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 111-750-248
+ * Detected change in '/Users/rcolburn/candidly/app.py', reloading
+ * Restarting with stat
+  File "/Users/rcolburn/candidly/app.py", line 1483
+    try:
+    ^^^
+SyntaxError: expected 'except' or 'finally' block
