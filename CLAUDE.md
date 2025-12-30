@@ -4,28 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Candidly is an AI-powered feedback collection tool with two main modes:
-1. **Traditional Survey Mode**: Full feedback collection system with templates, AI chat, and review process
-2. **Single-Player Mode**: AI interview assistant for external feedback forms (HRIS, Workday, etc.)
-
-The system uses GPT-4o to conduct intelligent conversations that gather detailed, specific feedback, then organizes responses professionally while preserving all user content.
+Candidly is a peer feedback collection tool with conversational follow-ups. The system uses an AI chatbot to conduct dynamic interviews for open-ended feedback questions, then organizes and preserves responses for review before final submission. The system includes advanced features like regeneratable summaries with prompt editing, comprehensive markdown rendering, user authentication, and coaching guides.
 
 ## Key Components
 
-**Traditional Survey Mode:**
-- User authentication with role-based permissions
-- Template system for reusable feedback questions (rating, agreement, discussion)
-- AI chatbot for conversational follow-ups on discussion questions
-- Response organization while preserving all user content
-- Regenerate feature with editable AI prompts
-- Review interface with markdown rendering
-
-**Single-Player Mode:**
-- Screenshot upload and text input for external feedback forms
-- OpenAI Vision API for form text extraction
-- Chat-based AI interview that systematically covers all feedback topics
-- Context-aware questioning that adapts to working relationship and role level
-- Final organized feedback ready for copy/paste to external systems
+- **User Authentication**: Flask-Login with role-based permissions
+- **Template System**: Create reusable feedback templates with rating, agreement, and discussion questions
+- **Survey Builder**: Create feedback requests with mixed question types and user assignment
+- **AI Chatbot Interface**: GPT-4o powered conversational follow-ups for discussion questions
+- **Response Organization**: AI organizes chat conversations while preserving ALL user content
+- **Regenerate Feature**: Users can edit AI prompts directly to customize feedback organization
+- **Review Interface**: Comprehensive review with markdown rendering and inline editing
+- **Coaching Guides**: AI-generated personalized coaching for delivering feedback
+- **Dashboard**: User-specific view of created and assigned feedback requests
 
 ## Tech Stack
 
@@ -101,25 +92,27 @@ flask db upgrade
 
 ```
 candidly/
-├── app.py              # Main Flask application with routes and AI integration
-├── models.py           # Database models 
+├── app.py              # Main Flask application with all routes and AI integration
+├── models.py           # Database models (User, FeedbackTemplate, Question, Response, etc.)
+├── auth.py             # Authentication system and permissions
 ├── config.py           # Configuration settings
 ├── dev.py              # Development setup script
 ├── requirements.txt    # Python dependencies
 ├── templates/          # Jinja2 HTML templates
 │   ├── base.html       # Base template with Bootstrap and marked.js
-│   ├── single_player.html     # Single-player mode form upload
-│   ├── single_player_chat.html # Single-player AI chat interface
-│   ├── survey.html     # Traditional survey interface with AI chat
-│   └── report.html     # Feedback reports with regenerate feature
+│   ├── coaching.html   # AI-generated coaching guides
+│   ├── report.html     # Feedback reports with regenerate feature
+│   └── survey.html     # Survey interface with AI chat
 ├── tests/              # Comprehensive test suite
 └── migrations/         # Database migration files
 ```
 
 ## Key Development Notes
 
-- **Single-Player Mode**: Primary focus is the AI interview assistant for external forms
-- **AI Integration**: GPT-4o with Vision API for screenshot text extraction
-- **Chat Interface**: Expanding textareas, character counters, systematic topic coverage
-- **Context Awareness**: AI adapts questioning depth based on working relationship
-- **Content Preservation**: AI organizes feedback while preserving ALL user details
+- **Focus on simplicity**: Minimal cognitive load with clear user flows
+- **Performance optimized**: Low-latency AI responses with focused single questions
+- **Full authentication**: Role-based user system with permissions
+- **AI-powered organization**: Preserves ALL user content while organizing professionally
+- **Transparency**: Users can view and edit AI prompts directly
+- **Extensible design**: Markdown rendering, comprehensive testing, and modular architecture
+- **Regenerate feature**: Allows customization of feedback organization post-submission

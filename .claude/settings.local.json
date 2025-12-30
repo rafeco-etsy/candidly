@@ -7,7 +7,8 @@
       "Bash(pytest:*)",
       "Bash(git add:*)",
       "Bash(sqlite3:*)",
-      "Bash(flask db:*)"
+      "Bash(flask db:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
